@@ -14,15 +14,189 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
+   <property name="styleSheet">
+    <string notr="true">/* 主窗口背景 */
+QWidget#centralwidget {
+	background-color: #F0F2F5;
+	font-family: &quot;Segoe UI&quot;, &quot;Microsoft YaHei&quot;;
+}
+
+/* 分组框样式 */
+QGroupBox {
+    font-weight: 500;
+    border: 1px solid #E1E5EB;
+    border-radius: 8px;
+    margin-top: 1ex; /* 为标题留出空间 */
+    background-color: #FAFBFD;
+    font-family: &quot;Segoe UI&quot;, &quot;Microsoft YaHei&quot;;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 10px;
+    padding: 0 5px 0 5px;
+    color: #5A6475;
+}
+
+/* 按钮通用样式 */
+QPushButton {
+    background-color: #5B8DB8;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 16px;
+    font-weight: 500;
+    font-family: &quot;Segoe UI&quot;, &quot;Microsoft YaHei&quot;;
+    min-height: 24px;
+}
+
+QPushButton:hover {
+    background-color: #4A7A9F;
+}
+
+QPushButton:pressed {
+    background-color: #3D6785;
+}
+
+QPushButton:disabled {
+    background-color: #8997A5;
+}
+
+/* 标签样式 */
+QLabel {
+    color: #5A6475;
+    font-family: &quot;Segoe UI&quot;, &quot;Microsoft YaHei&quot;;
+}
+
+/* 组合框样式 */
+QComboBox {
+    padding: 8px 12px;
+    border: 1px solid #D4D9E0;
+    border-radius: 6px;
+    background-color: #FAFBFD;
+    font-family: &quot;Segoe UI&quot;, &quot;Microsoft YaHei&quot;;
+    min-height: 24px;
+}
+
+QComboBox:hover {
+    border-color: #5B8DB8;
+}
+
+QComboBox::drop-down {
+    border: none;
+    border-radius: 6px;
+}
+
+QComboBox::down-arrow {
+    image: url(:/icons/down_arrow.png);
+    width: 12px;
+    height: 12px;
+    margin-right: 8px;
+}
+
+/* 输入框样式 */
+QLineEdit {
+    padding: 8px 12px;
+    border: 1px solid #D4D9E0;
+    border-radius: 6px;
+    background-color: #FAFBFD;
+    font-family: &quot;Segoe UI&quot;, &quot;Microsoft YaHei&quot;;
+    selection-background-color: #5B8DB8;
+    selection-color: white;
+    min-height: 24px;
+}
+
+QLineEdit:focus {
+    border-color: #5B8DB8;
+    outline: none;
+}
+
+/* 滑块样式 */
+QSlider::groove:horizontal {
+    height: 6px;
+    background: #E1E5EB;
+    border-radius: 3px;
+}
+
+QSlider::handle:horizontal {
+    background: #5B8DB8;
+    border: none;
+    width: 18px;
+    height: 18px;
+    margin: -6px 0;
+    border-radius: 9px;
+}
+
+QSlider::sub-page:horizontal {
+    background: #8997A5;
+    border-radius: 3px;
+}
+
+/* 单选按钮样式 */
+QRadioButton {
+    color: #5A6475;
+    font-family: &quot;Segoe UI&quot;, &quot;Microsoft YaHei&quot;;
+    spacing: 8px;
+}
+
+QRadioButton::indicator {
+    width: 18px;
+    height: 18px;
+}
+
+QRadioButton::indicator:unchecked {
+    border: 2px solid #D4D9E0;
+    border-radius: 9px;
+    background-color: #FAFBFD;
+}
+
+QRadioButton::indicator:checked {
+    border: 2px solid #5B8DB8;
+    border-radius: 9px;
+    background-color: #5B8DB8;
+}
+
+/* 列表视图样式 */
+QListView {
+    border: 1px solid #D4D9E0;
+    border-radius: 6px;
+    background-color: #FAFBFD;
+    alternate-background-color: #F0F2F5;
+    font-family: &quot;Segoe UI&quot;, &quot;Microsoft YaHei&quot;;
+}
+
+QListView::item {
+    padding: 6px 8px;
+}
+
+QListView::item:selected {
+    background-color: #5B8DB8;
+    color: white;
+}
+
+/* LCD数字显示样式 */
+QLCDNumber {
+    color: #5B8DB8;
+    border: none;
+    background-color: transparent;
+}
+</string>
+   </property>
    <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="2,5">
     <item>
-     <layout class="QVBoxLayout" name="left" stretch="3,6,1">
+     <layout class="QVBoxLayout" name="left">
+      <property name="spacing">
+       <number>12</number>
+      </property>
       <item>
        <widget class="QGroupBox" name="inputBox">
         <property name="title">
          <string>添加图片</string>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout">
+         <property name="spacing">
+          <number>6</number>
+         </property>
          <item>
           <spacer name="verticalSpacer_5">
            <property name="orientation">
@@ -85,8 +259,27 @@
          <string>输出选项</string>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_2">
+         <property name="spacing">
+          <number>10</number>
+         </property>
+         <item>
+          <spacer name="verticalSpacer_7">
+           <property name="orientation">
+            <enum>Qt::Orientation::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
          <item>
           <layout class="QVBoxLayout" name="format">
+           <property name="spacing">
+            <number>4</number>
+           </property>
            <item>
             <widget class="QLabel" name="outFormatTitle">
              <property name="text">
@@ -113,7 +306,10 @@
           </spacer>
          </item>
          <item>
-          <layout class="QVBoxLayout" name="outdir" stretch="0,0">
+          <layout class="QVBoxLayout" name="outdir">
+           <property name="spacing">
+            <number>4</number>
+           </property>
            <item>
             <widget class="QLabel" name="outDirTitle">
              <property name="text">
@@ -152,6 +348,9 @@
          </item>
          <item>
           <layout class="QVBoxLayout" name="quality">
+           <property name="spacing">
+            <number>4</number>
+           </property>
            <item>
             <widget class="QLabel" name="qualityTitle">
              <property name="text">
@@ -174,7 +373,10 @@
              <item>
               <widget class="QLabel" name="qualityShow">
                <property name="text">
-                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;0&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;0&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignmentFlag::AlignCenter</set>
                </property>
               </widget>
              </item>
@@ -202,11 +404,37 @@
            </property>
           </widget>
          </item>
+         <item>
+          <spacer name="verticalSpacer_8">
+           <property name="orientation">
+            <enum>Qt::Orientation::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
         </layout>
        </widget>
       </item>
       <item>
        <widget class="QPushButton" name="run">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>44</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Segoe UI</family>
+          <pointsize>10</pointsize>
+          <fontweight>Medium</fontweight>
+         </font>
+        </property>
         <property name="text">
          <string>执行</string>
         </property>
@@ -216,140 +444,257 @@
     </item>
     <item>
      <widget class="QGroupBox" name="right">
+      <property name="styleSheet">
+       <string notr="true">QGroupBox#right {
+     background-color: #FFFFFF;
+     border: 1px solid #E1E5EB;
+     border-radius: 8px;
+     margin-top: 1ex;
+ }
+
+ QGroupBox#right::title {
+     subcontrol-origin: margin;
+     left: 10px;
+     padding: 0 5px 0 5px;
+     color: #5A6475;
+     font-weight: 500;
+ }</string>
+      </property>
       <property name="title">
        <string>图片预览</string>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_4">
-         <item>
-          <widget class="QLCDNumber" name="selectedNum"/>
-         </item>
-         <item>
-          <widget class="QLabel" name="labelSelectedNum">
-           <property name="text">
-            <string>张已选</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer">
-           <property name="orientation">
-            <enum>Qt::Orientation::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QToolButton" name="clearSelected">
-           <property name="styleSheet">
-            <string notr="true">/* --- 专业灰色清除按钮 QSS --- */
+        <widget class="QWidget" name="toolbarWidget" native="true">
+         <property name="styleSheet">
+          <string notr="true">QWidget#toolbarWidget {
+    background-color: #E9EEF5;
+    border: 1px solid #D4D9E0;
+    border-radius: 6px;
+    padding: 8px;
+}</string>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <item>
+           <widget class="QLCDNumber" name="selectedNum">
+            <property name="styleSheet">
+             <string notr="true">QLCDNumber {
+    color: #4285F4;
+    border: none;
+    background-color: transparent;
+}</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="labelSelectedNum">
+            <property name="styleSheet">
+             <string notr="true">QLabel {
+    color: #5A6475;
+    font-family: &quot;Segoe UI&quot;, &quot;Microsoft YaHei&quot;;
+    font-weight: 500;
+}</string>
+            </property>
+            <property name="text">
+             <string>张已选</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Orientation::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QToolButton" name="clearSelected">
+            <property name="styleSheet">
+             <string notr="true">/* --- 工具栏按钮 QSS --- */
 
 QToolButton {
     /* 基础样式 */
-    background-color: #EAEAEA;        /* 浅灰色背景 */
-    color: #333333;                   /* 深灰色文字，保证可读性 */
-    border: 1px solid #C8C8C8;        /* 柔和的边框 */
-    border-radius: 4px;               /* 舒适的圆角 */
-    padding: 5px 12px;                /* 内边距 (上下5px, 左右12px) */
-    font-weight: bold;                /* 字体加粗，让文字更清晰 */
+    background-color: #5B8DB8;        /* 柔和蓝色背景 */
+    color: #FFFFFF;                   /* 白色文字 */
+    border: none;                     /* 无边框 */
+    border-radius: 6px;               /* 圆润边角 */
+    padding: 8px 16px;                /* 舒适内边距 */
+    font-weight: 500;                 /* 中等字体粗细 */
+    font-family: &quot;Segoe UI&quot;, &quot;Microsoft YaHei&quot;; /* 现代字体 */
+    min-width: 80px;
 }
 
 QToolButton:hover {
     /* 鼠标悬停状态 */
-    background-color: #DCDCDC;        /* 悬停时背景变深 */
-    border-color: #B8B8B8;            /* 边框颜色也相应加深 */
+    background-color: #4A7A9F;        /* 深一号的悬停色 */
 }
 
 QToolButton:pressed {
     /* 鼠标按下状态 */
-    background-color: #C8C8C8;        /* 按下时背景更深 */
-    border-color: #A0A0A0;
+    background-color: #3D6785;        /* 更深的按下色 */
 }
 
 QToolButton:disabled {
     /* 禁用状态 */
-    background-color: #F5F5F5;        /* 更浅的背景 */
-    color: #BDBDBD;                   /* 灰色文字 */
-    border-color: #E0E0E0;
+    background-color: #8997A5;        /* 浅灰色禁用状态 */
+    color: #CED4DA;
 }
 </string>
-           </property>
-           <property name="text">
-            <string>清除已选</string>
-           </property>
-           <property name="icon">
-            <iconset theme="QIcon::ThemeIcon::EditDelete"/>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QToolButton" name="clearAll">
-           <property name="styleSheet">
-            <string notr="true">/* --- 专业灰色清除按钮 QSS --- */
+            </property>
+            <property name="text">
+             <string>清除已选</string>
+            </property>
+            <property name="icon">
+             <iconset theme="QIcon::ThemeIcon::EditDelete"/>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="clearAll">
+            <property name="styleSheet">
+             <string notr="true">/* --- 工具栏按钮 QSS --- */
 
 QToolButton {
     /* 基础样式 */
-    background-color: #EAEAEA;        /* 浅灰色背景 */
-    color: #333333;                   /* 深灰色文字，保证可读性 */
-    border: 1px solid #C8C8C8;        /* 柔和的边框 */
-    border-radius: 4px;               /* 舒适的圆角 */
-    padding: 5px 12px;                /* 内边距 (上下5px, 左右12px) */
-    font-weight: bold;                /* 字体加粗，让文字更清晰 */
+    background-color: #5B8DB8;        /* 柔和蓝色背景 */
+    color: #FFFFFF;                   /* 白色文字 */
+    border: none;                     /* 无边框 */
+    border-radius: 6px;               /* 圆润边角 */
+    padding: 8px 16px;                /* 舒适内边距 */
+    font-weight: 500;                 /* 中等字体粗细 */
+    font-family: &quot;Segoe UI&quot;, &quot;Microsoft YaHei&quot;; /* 现代字体 */
+    min-width: 80px;
 }
 
 QToolButton:hover {
     /* 鼠标悬停状态 */
-    background-color: #DCDCDC;        /* 悬停时背景变深 */
-    border-color: #B8B8B8;            /* 边框颜色也相应加深 */
+    background-color: #4A7A9F;        /* 深一号的悬停色 */
 }
 
 QToolButton:pressed {
     /* 鼠标按下状态 */
-    background-color: #C8C8C8;        /* 按下时背景更深 */
-    border-color: #A0A0A0;
+    background-color: #3D6785;        /* 更深的按下色 */
 }
 
 QToolButton:disabled {
     /* 禁用状态 */
-    background-color: #F5F5F5;        /* 更浅的背景 */
-    color: #BDBDBD;                   /* 灰色文字 */
-    border-color: #E0E0E0;
+    background-color: #8997A5;        /* 浅灰色禁用状态 */
+    color: #CED4DA;
 }
 </string>
-           </property>
-           <property name="text">
-            <string>清除所有</string>
-           </property>
-           <property name="icon">
-            <iconset theme="QIcon::ThemeIcon::EditClear"/>
-           </property>
-          </widget>
-         </item>
-        </layout>
+            </property>
+            <property name="text">
+             <string>清除所有</string>
+            </property>
+            <property name="icon">
+             <iconset theme="QIcon::ThemeIcon::EditClear"/>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
        </item>
        <item>
-        <widget class="QListView" name="imageList"/>
+        <widget class="QListView" name="imageList">
+         <property name="styleSheet">
+          <string notr="true">QListView {
+    border: 1px solid #D4D9E0;
+    border-radius: 6px;
+    background-color: #FAFBFD;
+    alternate-background-color: #F0F2F5;
+    font-family: &quot;Segoe UI&quot;, &quot;Microsoft YaHei&quot;;
+    margin-top: 8px;
+}
+
+QListView::item {
+    padding: 6px 8px;
+    border-bottom: 1px solid #E1E5EB;
+}
+
+QListView::item:selected {
+    background-color: #4285F4;
+    color: white;
+}</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
     </item>
    </layout>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QStatusBar" name="statusbar">
+   <property name="styleSheet">
+    <string notr="true">QStatusBar {
+    background-color: #F0F2F5;
+    border-top: 1px solid #E1E5EB;
+    font-family: &quot;Segoe UI&quot;, &quot;Microsoft YaHei&quot;;
+}
+
+QStatusBar::item {
+    border: none;
+}</string>
+   </property>
+  </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>33</height>
+     <height>30</height>
     </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QMenuBar {
+    background-color: #FFFFFF;
+    border-bottom: 1px solid #E1E5EB;
+    font-family: &quot;Segoe UI&quot;, &quot;Microsoft YaHei&quot;;
+}
+
+QMenuBar::item {
+    background: transparent;
+    padding: 6px 12px;
+    color: #5A6475;
+}
+
+QMenuBar::item:selected {
+    background: #E9EEF5;
+}
+
+QMenuBar::item:pressed {
+    background: #5B8DB8;
+    color: white;
+}
+
+QMenu {
+    background-color: #FFFFFF;
+    border: 1px solid #E1E5EB;
+    border-radius: 6px;
+    padding: 4px 0px;
+    font-family: &quot;Segoe UI&quot;, &quot;Microsoft YaHei&quot;;
+}
+
+QMenu::item {
+    padding: 6px 24px;
+    color: #5A6475;
+}
+
+QMenu::item:selected {
+    background-color: #E9EEF5;
+}
+
+QMenu::separator {
+    height: 1px;
+    background: #E1E5EB;
+    margin: 4px 0px;
+}</string>
    </property>
   </widget>
  </widget>
