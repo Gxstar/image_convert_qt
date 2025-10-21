@@ -12,7 +12,6 @@ wheels/
 # PySide6 specific files
 *.qrc
 *_rc.py
-ui_*.py
 
 # Qt Designer files
 *.ui.autosave
