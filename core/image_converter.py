@@ -48,8 +48,36 @@ class ImageConverter:
                 # 准备保存参数
                 save_kwargs = self._prepare_save_params(format_name, quality)
                 
-                # 如果存在EXIF数据，则添加exif参数（默认所有格式都支持）
-                if exif_data:
+                # HEIC格式的特殊处理
+                if format_name.upper() == 'HEIC':
+                    # HEIC格式需要特殊处理
+                    # 根据pillow-heif文档，HEIC格式需要正确的文件扩展名和格式标识
+                    
+                    # 确保文件扩展名正确
+                    if not output_path.lower().endswith(('.heic', '.heics')):
+                        # 如果扩展名不正确，添加.heic扩展名
+                        import os
+                        base_name = os.path.splitext(output_path)[0]
+                        output_path = base_name + '.heic'
+                    
+                    # HEIC格式的特殊参数设置
+                    # 使用HEIF格式标识，pillow-heif会根据文件扩展名自动处理
+                    save_kwargs['format'] = 'HEIF'
+                    
+                    # HEIC格式可能需要不同的质量参数处理
+                    if 'quality' in save_kwargs:
+                        # 确保质量参数在有效范围内
+                        quality_val = save_kwargs['quality']
+                        if quality_val == -1:
+                            # 无损压缩
+                            save_kwargs['quality'] = -1
+                        else:
+                            # 有损压缩，确保在0-100范围内
+                            save_kwargs['quality'] = max(0, min(100, quality_val))
+                
+                # 如果存在EXIF数据，则添加exif参数
+                if exif_data and format_name.upper() != 'HEIC':
+                    # HEIC格式的EXIF处理需要特殊方式，避免直接传递
                     save_kwargs['exif'] = exif_data
                 
                 # 保存图片
