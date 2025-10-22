@@ -12,7 +12,7 @@ class ConversionService:
         """初始化转换服务"""
         self.converter = ImageConverter()
     
-    def convert_images(self, image_files, output_dir, output_format, quality=85, progress_callback=None):
+    def convert_images(self, image_files, output_dir, output_format, quality=85, replace=False, progress_callback=None):
         """
         转换图片文件
         
@@ -21,6 +21,7 @@ class ConversionService:
             output_dir: 输出目录
             output_format: 输出格式
             quality: 图片质量 (1-100)
+            replace: 是否替换同名文件
             progress_callback: 进度回调函数
             
         Returns:
@@ -36,6 +37,15 @@ class ConversionService:
                 filename = Path(image_path).stem
                 output_filename = f"{filename}.{output_format.lower()}"
                 output_path = os.path.join(output_dir, output_filename)
+                
+                # 如果不替换且文件已存在，则跳过
+                if not replace and os.path.exists(output_path):
+                    error_count += 1
+                    print(f"文件已存在，跳过: {output_path}")
+                    # 调用进度回调
+                    if progress_callback:
+                        progress_callback(i + 1, total, image_path)
+                    continue
                 
                 # 执行转换
                 success, error = self.converter.convert(image_path, output_path, output_format, quality)

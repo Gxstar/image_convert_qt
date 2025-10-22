@@ -4,6 +4,14 @@
 import os
 from PIL import Image
 
+# 注册HEIF插件以支持HEIC、HEIF、AVIF格式
+try:
+    from pillow_heif import register_heif_opener
+    register_heif_opener()
+    HEIF_SUPPORTED = True
+except ImportError:
+    HEIF_SUPPORTED = False
+
 
 class ImageConverter:
     def __init__(self):
@@ -25,6 +33,9 @@ class ImageConverter:
         """
         try:
             with Image.open(input_path) as img:
+                # 提取EXIF信息
+                exif_data = img.getexif()
+                
                 # 处理RGBA到RGB的转换（JPEG不支持透明度）
                 if format_name.upper() == 'JPEG' and img.mode in ('RGBA', 'LA', 'P'):
                     # 创建白色背景
@@ -36,6 +47,10 @@ class ImageConverter:
                 
                 # 准备保存参数
                 save_kwargs = self._prepare_save_params(format_name, quality)
+                
+                # 如果存在EXIF数据，则添加exif参数（默认所有格式都支持）
+                if exif_data:
+                    save_kwargs['exif'] = exif_data
                 
                 # 保存图片
                 img.save(output_path, **save_kwargs)
@@ -66,6 +81,15 @@ class ImageConverter:
         if format_name.upper() == 'PNG':
             save_kwargs['optimize'] = True
             
+        # HEIF相关格式的质量参数
+        if format_name.upper() in ['HEIC', 'HEIF', 'AVIF']:
+            # 质量参数范围是0-100，需要转换为HEIF库期望的范围
+            # HEIF质量参数: -1表示无损，0-100表示有损
+            if quality == 100:
+                save_kwargs['quality'] = -1  # 无损
+            else:
+                save_kwargs['quality'] = quality
+            
         return save_kwargs
     
     def get_supported_formats(self):
@@ -75,4 +99,8 @@ class ImageConverter:
         Returns:
             list: 支持的格式列表
         """
-        return ['JPEG', 'PNG', 'WEBP', 'TIFF']
+        base_formats = ['JPEG', 'PNG', 'WEBP', 'TIFF']
+        if HEIF_SUPPORTED:
+            # 添加HEIF相关的格式
+            base_formats.extend(['HEIC', 'HEIF', 'AVIF'])
+        return base_formats

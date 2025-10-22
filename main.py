@@ -59,7 +59,7 @@ class MainWindow(QMainWindow):
             self, 
             "选择图片", 
             "", 
-            "图片文件 (*.png *.jpg *.jpeg *.bmp *.tiff *.webp)"
+            "图片文件 (*.png *.jpg *.jpeg *.bmp *.tiff *.webp *.heic *.heif *.avif)"
         )
         
         if file_paths:
@@ -71,7 +71,7 @@ class MainWindow(QMainWindow):
         directory = QFileDialog.getExistingDirectory(self, "选择目录")
         if directory:
             # 获取目录下所有图片文件
-            image_extensions = ['*.png', '*.jpg', '*.jpeg', '*.bmp', '*.tiff', '*.webp']
+            image_extensions = ['*.png', '*.jpg', '*.jpeg', '*.bmp', '*.tiff', '*.webp', '*.heic', '*.heif', '*.avif']
             image_paths = []
             for extension in image_extensions:
                 # 使用glob查找文件
@@ -159,15 +159,60 @@ class MainWindow(QMainWindow):
             self.ui.statusbar.showMessage(f"转换完成: 成功 {success_count} 个, 失败 {fail_count} 个")
             show_message(self, "完成", f"转换完成:\n成功: {success_count} 个\n失败: {fail_count} 个")
             
-        self.conversion_service.convert_images(
+        # 立即显示开始转换的进度信息
+        total_files = len(self.image_list_manager.get_file_paths())
+        self.ui.statusbar.showMessage(f"开始转换: 共 {total_files} 个文件")
+            
+        # 在线程中执行转换以避免阻塞UI
+        from PySide6.QtCore import QThread, Signal
+        
+        class ConvertThread(QThread):
+            progress_signal = Signal(int, int, str)
+            complete_signal = Signal(int, int)
+            
+            def __init__(self, conversion_service, image_files, output_dir, format_ext, quality, replace):
+                super().__init__()
+                self.conversion_service = conversion_service
+                self.image_files = image_files
+                self.output_dir = output_dir
+                self.format_ext = format_ext
+                self.quality = quality
+                self.replace = replace
+                
+            def run(self):
+                def progress_callback(current, total, filename):
+                    self.progress_signal.emit(current, total, filename)
+                    
+                # 立即发送第一个进度信号，显示开始转换
+                if self.image_files:
+                    self.progress_signal.emit(0, len(self.image_files), "开始转换...")
+                    
+                success_count, error_count = self.conversion_service.convert_images(
+                    self.image_files,
+                    self.output_dir,
+                    self.format_ext,
+                    self.quality,
+                    self.replace,
+                    progress_callback
+                )
+                self.complete_signal.emit(success_count, error_count)
+        
+        # 创建并启动转换线程
+        self.convert_thread = ConvertThread(
+            self.conversion_service,
             self.image_list_manager.get_file_paths(),
             output_dir,
             format_ext,
             quality,
-            replace,
-            on_progress,
-            on_complete
+            replace
         )
+        
+        # 连接信号
+        self.convert_thread.progress_signal.connect(on_progress)
+        self.convert_thread.complete_signal.connect(on_complete)
+        
+        # 启动线程
+        self.convert_thread.start()
         
     def closeEvent(self, event):
         """关闭事件，保存设置"""
