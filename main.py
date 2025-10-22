@@ -1,12 +1,18 @@
 """
-图片格式转换工具 - 主程序
+主程序入口
 """
 import sys
-from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QListWidgetItem
-from PySide6.QtCore import Qt
+import os
+from pathlib import Path
+
+from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox
+from PySide6.QtCore import Qt, QSettings
+
 from ui_mainwindow import Ui_MainWindow
-from utils import get_image_files, show_message, show_question
-from image_converter import ImageConverter
+from managers.image_list_manager import ImageListManager
+from services.image_loader_service import ImageLoaderService
+from services.conversion_service import ConversionService
+from core.utils import show_message, show_question
 
 
 class MainWindow(QMainWindow):
@@ -14,202 +20,175 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self.setWindowTitle("图片格式转换工具")
         
-        # 初始化数据
-        self.image_files = []
-        self.converter = ImageConverter()
-        
-        # 初始化UI
-        self.init_ui()
+        # 初始化服务和管理器
+        self.conversion_service = ConversionService()
+        self.loader_service = ImageLoaderService()
+        self.image_list_manager = ImageListManager(self.ui.imageList)
         
         # 连接信号和槽
-        self.connect_signals()
-    
-    def init_ui(self):
-        """初始化UI设置"""
-        # 设置输出格式选项
-        formats = ["JPEG", "PNG", "BMP", "GIF", "TIFF", "WebP"]
-        self.ui.formatSelection.addItems(formats)
+        self._connect_signals()
         
-        # 设置质量滑块范围
-        self.ui.qualityValue.setRange(1, 100)
-        self.ui.qualityValue.setValue(85)
+        # 加载设置
+        self.settings = QSettings("ImageConverter", "ImageConverter")
+        self._load_settings()
         
-        # 设置列表视图
-        self.ui.imageList.setAlternatingRowColors(True)
-    
-    def connect_signals(self):
+        # 更新格式选项
+        self._update_format_options()
+        
+    def _connect_signals(self):
         """连接信号和槽"""
-        # 质量滑块数值更新
-        self.ui.qualityValue.valueChanged.connect(self.update_quality_display)
+        # 输入相关
+        self.ui.addImages.clicked.connect(self._select_images)
+        self.ui.addDirs.clicked.connect(self._select_directories)
         
-        # 图片选择按钮
-        self.ui.addImages.clicked.connect(self.select_images)
-        self.ui.addDirs.clicked.connect(self.select_directory)
+        # 输出相关
+        self.ui.pushButton.clicked.connect(self._select_output_directory)
+        self.ui.qualityValue.valueChanged.connect(self._update_quality_display)
         
-        # 输出目录选择
-        self.ui.pushButton.clicked.connect(self.select_output_directory)
+        # 图片列表相关
+        self.ui.clearSelected.clicked.connect(self._remove_selected)
+        self.ui.clearAll.clicked.connect(self._clear_all)
         
-        # 清除按钮
-        self.ui.clearSelected.clicked.connect(self.clear_selected)
-        self.ui.clearAll.clicked.connect(self.clear_all)
+        # 转换相关
+        self.ui.run.clicked.connect(self._convert_images)
         
-        # 执行按钮
-        self.ui.run.clicked.connect(self.start_conversion)
-    
-    def update_quality_display(self, value):
-        """更新质量显示"""
-        self.ui.qualityShow.setText(str(value))
-    
-    def select_images(self):
+    def _select_images(self):
         """选择图片文件"""
-        file_dialog = QFileDialog()
-        file_dialog.setFileMode(QFileDialog.ExistingFiles)
-        file_dialog.setNameFilter("图片文件 (*.jpg *.jpeg *.png *.bmp *.gif *.tiff *.webp)")
-        
-        if file_dialog.exec():
-            files = file_dialog.selectedFiles()
-            self.add_images_to_list(files)
-    
-    def select_directory(self):
-        """选择文件夹"""
-        directory = QFileDialog.getExistingDirectory(
-            self, "选择图片文件夹", "",
-            QFileDialog.ShowDirsOnly | QFileDialog.DontResolveSymlinks
+        file_paths, _ = QFileDialog.getOpenFileNames(
+            self, 
+            "选择图片", 
+            "", 
+            "图片文件 (*.png *.jpg *.jpeg *.bmp *.tiff *.webp)"
         )
         
+        if file_paths:
+            self.image_list_manager.add_files(file_paths)
+            self._update_selected_count()
+            
+    def _select_directories(self):
+        """选择图片目录"""
+        directory = QFileDialog.getExistingDirectory(self, "选择目录")
         if directory:
-            image_files = get_image_files(directory)
-            if image_files:
-                self.add_images_to_list(image_files)
+            # 获取目录下所有图片文件
+            image_extensions = ['*.png', '*.jpg', '*.jpeg', '*.bmp', '*.tiff', '*.webp']
+            image_paths = []
+            for extension in image_extensions:
+                # 使用glob查找文件
+                from pathlib import Path
+                paths = Path(directory).glob(f"**/{extension}")
+                image_paths.extend([str(p) for p in paths])
+                
+            if image_paths:
+                self.image_list_manager.add_files(image_paths)
+                self._update_selected_count()
             else:
-                show_message(self, "提示", "所选文件夹中没有找到图片文件")
-    
-    def add_images_to_list(self, files):
-        """添加图片到列表"""
-        new_files = []
-        for file_path in files:
-            if file_path not in self.image_files:
-                self.image_files.append(file_path)
-                new_files.append(file_path)
-        
-        # 更新列表显示
-        import os
-        for file_path in new_files:
-            item = QListWidgetItem(os.path.basename(file_path))
-            item.setData(Qt.UserRole, file_path)  # 存储完整路径
-            self.ui.imageList.addItem(item)
-        
-        # 更新已选数量
-        self.update_selected_count()
-        
-        if new_files:
-            self.ui.statusbar.showMessage(f"已添加 {len(new_files)} 张图片", 3000)
-    
-    def update_selected_count(self):
-        """更新已选图片数量显示"""
-        count = len(self.image_files)
-        self.ui.selectedNum.display(count)
-    
-    def select_output_directory(self):
+                show_message(self, "提示", "所选目录中未找到图片文件")
+                
+    def _select_output_directory(self):
         """选择输出目录"""
-        directory = QFileDialog.getExistingDirectory(
-            self, "选择输出目录", "",
-            QFileDialog.ShowDirsOnly | QFileDialog.DontResolveSymlinks
-        )
-        
+        directory = QFileDialog.getExistingDirectory(self, "选择输出目录")
         if directory:
             self.ui.lineEdit.setText(directory)
-            self.ui.statusbar.showMessage(f"输出目录: {directory}", 3000)
-    
-    def clear_selected(self):
-        """清除已选项目"""
-        selected_items = self.ui.imageList.selectedItems()
-        if not selected_items:
-            show_message(self, "提示", "请先选择要清除的图片")
-            return
+            # 保存到设置
+            self.settings.setValue("output_dir", directory)
+            
+    def _update_quality_display(self, value):
+        """更新质量显示"""
+        self.ui.qualityShow.setText(f"{value}%")
         
-        for item in selected_items:
-            file_path = item.data(Qt.UserRole)
-            if file_path in self.image_files:
-                self.image_files.remove(file_path)
-            self.ui.imageList.takeItem(self.ui.imageList.row(item))
+    def _update_selected_count(self):
+        """更新选中数量显示"""
+        count = self.image_list_manager.get_file_count()
+        self.ui.selectedNum.display(count)
         
-        self.update_selected_count()
-        self.ui.statusbar.showMessage(f"已清除 {len(selected_items)} 张图片", 3000)
-    
-    def clear_all(self):
+    def _remove_selected(self):
+        """移除选中的图片"""
+        self.image_list_manager.remove_selected()
+        self._update_selected_count()
+        
+    def _clear_all(self):
         """清除所有图片"""
-        if not self.image_files:
-            show_message(self, "提示", "列表为空")
-            return
+        self.image_list_manager.clear_all()
+        self._update_selected_count()
         
-        if show_question(self, "确认", "确定要清除所有图片吗？"):
-            self.image_files.clear()
-            self.ui.imageList.clear()
-            self.update_selected_count()
-            self.ui.statusbar.showMessage("已清除所有图片", 3000)
-    
-    def start_conversion(self):
-        """开始图片转换"""
-        if not self.image_files:
-            show_message(self, "警告", "请先添加要转换的图片", self.style().standardIcon(self.style().SP_MessageBoxWarning))
-            return
+    def _update_format_options(self):
+        """更新格式选项"""
+        formats = self.conversion_service.get_supported_formats()
+        self.ui.formatSelection.clear()
+        self.ui.formatSelection.addItems(formats)
         
-        output_dir = self.ui.lineEdit.text()
+    def _load_settings(self):
+        """加载设置"""
+        # 输出目录
+        output_dir = self.settings.value("output_dir", "")
+        if output_dir:
+            self.ui.lineEdit.setText(output_dir)
+            
+        # 质量设置
+        quality = self.settings.value("quality", 100, type=int)
+        self.ui.qualityValue.setValue(quality)
+        self._update_quality_display(quality)
+        
+    def _convert_images(self):
+        """转换图片"""
+        # 检查是否有选中文件
+        if self.image_list_manager.get_file_count() == 0:
+            show_message(self, "提示", "请先选择要转换的图片")
+            return
+            
+        # 检查输出目录
+        output_dir = self.ui.lineEdit.text().strip()
         if not output_dir:
-            show_message(self, "警告", "请选择输出目录", self.style().standardIcon(self.style().SP_MessageBoxWarning))
+            show_message(self, "提示", "请选择输出目录")
             return
+            
+        # 确保输出目录存在
+        Path(output_dir).mkdir(parents=True, exist_ok=True)
         
         # 获取转换参数
-        output_format = self.ui.formatSelection.currentText().lower()
+        format_ext = self.ui.formatSelection.currentText()
         quality = self.ui.qualityValue.value()
-        replace_existing = self.ui.isReplace.isChecked()
+        replace = self.ui.isReplace.isChecked()
         
-        # 禁用执行按钮
-        self.ui.run.setEnabled(False)
-        self.ui.statusbar.showMessage("正在转换图片...")
-        
-        try:
-            # 批量转换
-            stats = self.converter.batch_convert(
-                self.image_files, output_dir, output_format, quality, replace_existing
-            )
+        # 执行转换
+        def on_progress(current, total, filename):
+            self.ui.statusbar.showMessage(f"正在转换 ({current}/{total}): {filename}")
             
-            # 显示结果
-            self._show_conversion_result(stats)
+        def on_complete(success_count, fail_count):
+            self.ui.statusbar.showMessage(f"转换完成: 成功 {success_count} 个, 失败 {fail_count} 个")
+            show_message(self, "完成", f"转换完成:\n成功: {success_count} 个\n失败: {fail_count} 个")
             
-        except Exception as e:
-            show_message(self, "错误", f"转换过程中发生错误: {str(e)}", self.style().standardIcon(self.style().SP_MessageBoxCritical))
+        self.conversion_service.convert_images(
+            self.image_list_manager.get_file_paths(),
+            output_dir,
+            format_ext,
+            quality,
+            replace,
+            on_progress,
+            on_complete
+        )
         
-        finally:
-            # 重新启用执行按钮
-            self.ui.run.setEnabled(True)
+    def closeEvent(self, event):
+        """关闭事件，保存设置"""
+        # 保存设置
+        self.settings.setValue("output_dir", self.ui.lineEdit.text())
+        self.settings.setValue("quality", self.ui.qualityValue.value())
+        event.accept()
+
+
+def main():
+    app = QApplication(sys.argv)
     
-    def _show_conversion_result(self, stats):
-        """显示转换结果"""
-        success_count = stats['success']
-        error_count = stats['error']
-        skipped_count = stats['skipped']
-        
-        if error_count == 0 and skipped_count == 0:
-            message = f"转换完成！成功转换 {success_count} 张图片"
-            self.ui.statusbar.showMessage(message, 5000)
-            show_message(self, "完成", message)
-        else:
-            message = f"转换完成！\n成功: {success_count} 张"
-            if error_count > 0:
-                message += f"\n失败: {error_count} 张"
-            if skipped_count > 0:
-                message += f"\n跳过: {skipped_count} 张"
-            
-            self.ui.statusbar.showMessage(message.replace('\n', '，'), 5000)
-            show_message(self, "完成", message, self.style().standardIcon(self.style().SP_MessageBoxWarning))
+    # 设置应用程序信息
+    app.setApplicationName("ImageConverter")
+    app.setApplicationDisplayName("图片格式转换器")
+    
+    window = MainWindow()
+    window.show()
+    
+    sys.exit(app.exec())
 
 
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = MainWindow()
-    window.show()
-    sys.exit(app.exec())
+    main()

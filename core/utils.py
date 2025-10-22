@@ -20,13 +20,15 @@ def get_image_files(directory):
     image_files = []
     
     for ext in image_extensions:
+        # 使用一次glob调用，避免重复（Windows系统glob不区分大小写）
         image_files.extend(Path(directory).glob(f"*{ext}"))
-        image_files.extend(Path(directory).glob(f"*{ext.upper()}"))
     
-    return [str(f) for f in image_files]
+    # 去重处理，确保每个文件只出现一次
+    unique_files = list(set(image_files))
+    return [str(f) for f in unique_files]
 
 
-def show_message(parent, title, message, icon=QMessageBox.Information):
+def show_message(parent, title, message, icon=None):
     """
     显示消息对话框
     
@@ -34,9 +36,18 @@ def show_message(parent, title, message, icon=QMessageBox.Information):
         parent: 父窗口
         title: 标题
         message: 消息内容
-        icon: 图标类型
+        icon: 图标
     """
-    QMessageBox(icon, title, message).exec()
+    msg_box = QMessageBox(parent)
+    msg_box.setWindowTitle(title)
+    msg_box.setText(message)
+    
+    if icon:
+        msg_box.setIconPixmap(icon.pixmap(32, 32))
+    else:
+        msg_box.setIcon(QMessageBox.Information)
+    
+    msg_box.exec()
 
 
 def show_question(parent, title, message):
@@ -49,7 +60,7 @@ def show_question(parent, title, message):
         message: 消息内容
         
     Returns:
-        bool: 用户选择结果
+        bool: 用户是否点击了"是"
     """
     reply = QMessageBox.question(
         parent, title, message,
@@ -57,28 +68,3 @@ def show_question(parent, title, message):
         QMessageBox.No
     )
     return reply == QMessageBox.Yes
-
-
-def ensure_directory(directory):
-    """
-    确保目录存在，如果不存在则创建
-    
-    Args:
-        directory: 目录路径
-    """
-    os.makedirs(directory, exist_ok=True)
-
-
-def get_output_filename(input_path, output_format):
-    """
-    生成输出文件名
-    
-    Args:
-        input_path: 输入文件路径
-        output_format: 输出格式
-        
-    Returns:
-        str: 输出文件名
-    """
-    base_name = os.path.splitext(os.path.basename(input_path))[0]
-    return f"{base_name}.{output_format}"
