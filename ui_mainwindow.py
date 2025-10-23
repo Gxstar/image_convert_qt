@@ -25,7 +25,7 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(800, 600)
+        MainWindow.resize(783, 660)
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.centralwidget.setStyleSheet(u"")
@@ -39,27 +39,15 @@ class Ui_MainWindow(object):
         self.verticalLayout = QVBoxLayout(self.inputBox)
         self.verticalLayout.setSpacing(6)
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.verticalSpacer_5 = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
-
-        self.verticalLayout.addItem(self.verticalSpacer_5)
-
         self.addImages = QPushButton(self.inputBox)
         self.addImages.setObjectName(u"addImages")
 
         self.verticalLayout.addWidget(self.addImages)
 
-        self.verticalSpacer_6 = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
-
-        self.verticalLayout.addItem(self.verticalSpacer_6)
-
         self.addDirs = QPushButton(self.inputBox)
         self.addDirs.setObjectName(u"addDirs")
 
         self.verticalLayout.addWidget(self.addDirs)
-
-        self.verticalSpacer_4 = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
-
-        self.verticalLayout.addItem(self.verticalSpacer_4)
 
 
         self.left.addWidget(self.inputBox)
@@ -250,7 +238,7 @@ class Ui_MainWindow(object):
         MainWindow.setStatusBar(self.statusbar)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 800, 30))
+        self.menubar.setGeometry(QRect(0, 0, 783, 33))
         self.menubar.setStyleSheet(u"")
         MainWindow.setMenuBar(self.menubar)
 
