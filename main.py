@@ -43,7 +43,7 @@ class MainWindow(QMainWindow):
         self.ui.addDirs.clicked.connect(self._select_directories)
         
         # 输出相关
-        self.ui.pushButton.clicked.connect(self._select_output_directory)
+        self.ui.outDirSelect.clicked.connect(self._select_output_directory)
         self.ui.qualityValue.valueChanged.connect(self._update_quality_display)
         
         # 图片列表相关
@@ -224,7 +224,8 @@ class MainWindow(QMainWindow):
 
 def main():
     app = QApplication(sys.argv)
-    
+    with open("style.qss", "r", encoding="utf-8") as f:
+        app.setStyleSheet(f.read())
     # 设置应用程序信息
     app.setApplicationName("ImageConverter")
     app.setApplicationDisplayName("图片格式转换器")

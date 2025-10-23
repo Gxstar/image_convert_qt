@@ -54,12 +54,11 @@ class Ui_MainWindow(object):
 
         self.outputBox = QGroupBox(self.centralwidget)
         self.outputBox.setObjectName(u"outputBox")
-        self.verticalLayout_2 = QVBoxLayout(self.outputBox)
-        self.verticalLayout_2.setSpacing(10)
-        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
-        self.verticalSpacer_7 = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+        self.verticalLayout_4 = QVBoxLayout(self.outputBox)
+        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
+        self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
-        self.verticalLayout_2.addItem(self.verticalSpacer_7)
+        self.verticalLayout_4.addItem(self.verticalSpacer)
 
         self.format = QVBoxLayout()
         self.format.setSpacing(4)
@@ -71,23 +70,39 @@ class Ui_MainWindow(object):
 
         self.formatSelection = QComboBox(self.outputBox)
         self.formatSelection.setObjectName(u"formatSelection")
+        self.formatSelection.setAcceptDrops(False)
 
         self.format.addWidget(self.formatSelection)
 
 
-        self.verticalLayout_2.addLayout(self.format)
+        self.verticalLayout_4.addLayout(self.format)
 
-        self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+        self.verticalSpacer_4 = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
-        self.verticalLayout_2.addItem(self.verticalSpacer)
+        self.verticalLayout_4.addItem(self.verticalSpacer_4)
 
-        self.outdir = QVBoxLayout()
-        self.outdir.setSpacing(4)
-        self.outdir.setObjectName(u"outdir")
+        self.verticalLayout_2 = QVBoxLayout()
+        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
+        self.horizontalLayout_5 = QHBoxLayout()
+        self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
         self.outDirTitle = QLabel(self.outputBox)
         self.outDirTitle.setObjectName(u"outDirTitle")
 
-        self.outdir.addWidget(self.outDirTitle)
+        self.horizontalLayout_5.addWidget(self.outDirTitle)
+
+        self.horizontalSpacer_2 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_5.addItem(self.horizontalSpacer_2)
+
+        self.outDirSelect = QToolButton(self.outputBox)
+        self.outDirSelect.setObjectName(u"outDirSelect")
+        icon = QIcon(QIcon.fromTheme(QIcon.ThemeIcon.FolderNew))
+        self.outDirSelect.setIcon(icon)
+
+        self.horizontalLayout_5.addWidget(self.outDirSelect)
+
+
+        self.verticalLayout_2.addLayout(self.horizontalLayout_5)
 
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
@@ -96,22 +111,16 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout.addWidget(self.lineEdit)
 
-        self.pushButton = QPushButton(self.outputBox)
-        self.pushButton.setObjectName(u"pushButton")
+        self.horizontalLayout.setStretch(0, 8)
 
-        self.horizontalLayout.addWidget(self.pushButton)
-
-        self.horizontalLayout.setStretch(0, 5)
-        self.horizontalLayout.setStretch(1, 2)
-
-        self.outdir.addLayout(self.horizontalLayout)
+        self.verticalLayout_2.addLayout(self.horizontalLayout)
 
 
-        self.verticalLayout_2.addLayout(self.outdir)
+        self.verticalLayout_4.addLayout(self.verticalLayout_2)
 
-        self.verticalSpacer_2 = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+        self.verticalSpacer_5 = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
-        self.verticalLayout_2.addItem(self.verticalSpacer_2)
+        self.verticalLayout_4.addItem(self.verticalSpacer_5)
 
         self.quality = QVBoxLayout()
         self.quality.setSpacing(4)
@@ -143,20 +152,20 @@ class Ui_MainWindow(object):
         self.quality.addLayout(self.horizontalLayout_2)
 
 
-        self.verticalLayout_2.addLayout(self.quality)
+        self.verticalLayout_4.addLayout(self.quality)
 
         self.verticalSpacer_3 = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
-        self.verticalLayout_2.addItem(self.verticalSpacer_3)
+        self.verticalLayout_4.addItem(self.verticalSpacer_3)
 
         self.isReplace = QCheckBox(self.outputBox)
         self.isReplace.setObjectName(u"isReplace")
 
-        self.verticalLayout_2.addWidget(self.isReplace)
+        self.verticalLayout_4.addWidget(self.isReplace)
 
-        self.verticalSpacer_8 = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+        self.verticalSpacer_2 = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
-        self.verticalLayout_2.addItem(self.verticalSpacer_8)
+        self.verticalLayout_4.addItem(self.verticalSpacer_2)
 
 
         self.left.addWidget(self.outputBox)
@@ -180,6 +189,7 @@ class Ui_MainWindow(object):
         self.right.setStyleSheet(u"")
         self.verticalLayout_3 = QVBoxLayout(self.right)
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
+        self.verticalLayout_3.setContentsMargins(0, 0, 0, 0)
         self.toolbarWidget = QWidget(self.right)
         self.toolbarWidget.setObjectName(u"toolbarWidget")
         self.toolbarWidget.setStyleSheet(u"")
@@ -204,16 +214,16 @@ class Ui_MainWindow(object):
         self.clearSelected = QToolButton(self.toolbarWidget)
         self.clearSelected.setObjectName(u"clearSelected")
         self.clearSelected.setStyleSheet(u"")
-        icon = QIcon(QIcon.fromTheme(QIcon.ThemeIcon.EditDelete))
-        self.clearSelected.setIcon(icon)
+        icon1 = QIcon(QIcon.fromTheme(QIcon.ThemeIcon.EditDelete))
+        self.clearSelected.setIcon(icon1)
 
         self.horizontalLayout_4.addWidget(self.clearSelected)
 
         self.clearAll = QToolButton(self.toolbarWidget)
         self.clearAll.setObjectName(u"clearAll")
         self.clearAll.setStyleSheet(u"")
-        icon1 = QIcon(QIcon.fromTheme(QIcon.ThemeIcon.EditClear))
-        self.clearAll.setIcon(icon1)
+        icon2 = QIcon(QIcon.fromTheme(QIcon.ThemeIcon.EditClear))
+        self.clearAll.setIcon(icon2)
 
         self.horizontalLayout_4.addWidget(self.clearAll)
 
@@ -256,7 +266,7 @@ class Ui_MainWindow(object):
         self.outputBox.setTitle(QCoreApplication.translate("MainWindow", u"\u8f93\u51fa\u9009\u9879", None))
         self.outFormatTitle.setText(QCoreApplication.translate("MainWindow", u"\u8f93\u51fa\u683c\u5f0f\u9009\u62e9", None))
         self.outDirTitle.setText(QCoreApplication.translate("MainWindow", u"\u8f93\u51fa\u8def\u5f84\u9009\u62e9", None))
-        self.pushButton.setText(QCoreApplication.translate("MainWindow", u"\u9009\u62e9\u76ee\u5f55", None))
+        self.outDirSelect.setText(QCoreApplication.translate("MainWindow", u"\u9009\u62e9\u76ee\u5f55", None))
         self.qualityTitle.setText(QCoreApplication.translate("MainWindow", u"\u8f93\u51fa\u8d28\u91cf", None))
         self.qualityShow.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p>100</p></body></html>", None))
         self.isReplace.setText(QCoreApplication.translate("MainWindow", u"\u662f\u5426\u66ff\u6362\u540c\u540d\u6587\u4ef6", None))
