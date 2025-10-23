@@ -318,6 +318,9 @@
           </item>
           <item>
            <widget class="QToolButton" name="clearSelected">
+            <property name="toolTip">
+             <string>清除选中图片</string>
+            </property>
             <property name="styleSheet">
              <string notr="true"/>
             </property>
@@ -331,6 +334,9 @@
           </item>
           <item>
            <widget class="QToolButton" name="clearAll">
+            <property name="toolTip">
+             <string>清除所有图片</string>
+            </property>
             <property name="styleSheet">
              <string notr="true"/>
             </property>

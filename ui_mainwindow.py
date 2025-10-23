@@ -273,7 +273,13 @@ class Ui_MainWindow(object):
         self.run.setText(QCoreApplication.translate("MainWindow", u"\u6267\u884c", None))
         self.right.setTitle(QCoreApplication.translate("MainWindow", u"\u56fe\u7247\u9884\u89c8", None))
         self.labelSelectedNum.setText(QCoreApplication.translate("MainWindow", u"\u5f20\u5df2\u9009", None))
+#if QT_CONFIG(tooltip)
+        self.clearSelected.setToolTip(QCoreApplication.translate("MainWindow", u"\u6e05\u9664\u9009\u4e2d\u56fe\u7247", None))
+#endif // QT_CONFIG(tooltip)
         self.clearSelected.setText(QCoreApplication.translate("MainWindow", u"\u6e05\u9664\u5df2\u9009", None))
+#if QT_CONFIG(tooltip)
+        self.clearAll.setToolTip(QCoreApplication.translate("MainWindow", u"\u6e05\u9664\u6240\u6709\u56fe\u7247", None))
+#endif // QT_CONFIG(tooltip)
         self.clearAll.setText(QCoreApplication.translate("MainWindow", u"\u6e05\u9664\u6240\u6709", None))
     # retranslateUi
 
