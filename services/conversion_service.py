@@ -35,7 +35,11 @@ class ConversionService:
             try:
                 # 生成输出文件路径
                 filename = Path(image_path).stem
-                output_filename = f"{filename}.{output_format.lower()}"
+                # 确保JPEG格式使用.jpg扩展名而不是.jpeg
+                if output_format.upper() == 'JPEG':
+                    output_filename = f"{filename}.jpg"
+                else:
+                    output_filename = f"{filename}.{output_format.lower()}"
                 output_path = os.path.join(output_dir, output_filename)
                 
                 # 如果不替换且文件已存在，则跳过

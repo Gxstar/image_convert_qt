@@ -16,7 +16,7 @@ def get_image_files(directory):
     Returns:
         list: 图片文件路径列表
     """
-    image_extensions = {'.jpg', '.jpeg', '.png', '.bmp', '.gif', '.tiff', '.webp'}
+    image_extensions = {'.jpg', '.png', '.bmp', '.gif', '.tiff', '.webp'}
     image_files = []
     
     for ext in image_extensions:

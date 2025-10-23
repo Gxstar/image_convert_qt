@@ -59,7 +59,7 @@ class MainWindow(QMainWindow):
             self, 
             "选择图片", 
             "", 
-            "图片文件 (*.png *.jpg *.jpeg *.bmp *.tiff *.webp *.heic *.heif *.avif)"
+            "图片文件 (*.png *.jpg *.jpeg *.bmp *.tiff *.tif *.webp *.heic *.heif *.avif *.gif *.jp2 *.j2k)"
         )
         
         if file_paths:
@@ -70,8 +70,8 @@ class MainWindow(QMainWindow):
         """选择图片目录"""
         directory = QFileDialog.getExistingDirectory(self, "选择目录")
         if directory:
-            # 获取目录下所有图片文件
-            image_extensions = ['*.png', '*.jpg', '*.jpeg', '*.bmp', '*.tiff', '*.webp', '*.heic', '*.heif', '*.avif']
+            # 定义支持的图片扩展名（当前最常用格式）
+            image_extensions = ['*.png', '*.jpg', '*.jpeg', '*.bmp', '*.tiff', '*.tif', '*.webp', '*.heic', '*.heif', '*.avif', '*.gif', '*.jp2', '*.j2k']
             image_paths = []
             for extension in image_extensions:
                 # 使用glob查找文件

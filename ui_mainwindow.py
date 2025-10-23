@@ -28,163 +28,7 @@ class Ui_MainWindow(object):
         MainWindow.resize(800, 600)
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
-        self.centralwidget.setStyleSheet(u"/* \u4e3b\u7a97\u53e3\u80cc\u666f */\n"
-"QWidget#centralwidget {\n"
-"	background-color: #F0F2F5;\n"
-"	font-family: \"Segoe UI\", \"Microsoft YaHei\";\n"
-"}\n"
-"\n"
-"/* \u5206\u7ec4\u6846\u6837\u5f0f */\n"
-"QGroupBox {\n"
-"    font-weight: 500;\n"
-"    border: 1px solid #E1E5EB;\n"
-"    border-radius: 8px;\n"
-"    margin-top: 1ex; /* \u4e3a\u6807\u9898\u7559\u51fa\u7a7a\u95f4 */\n"
-"    background-color: #FAFBFD;\n"
-"    font-family: \"Segoe UI\", \"Microsoft YaHei\";\n"
-"}\n"
-"\n"
-"QGroupBox::title {\n"
-"    subcontrol-origin: margin;\n"
-"    left: 10px;\n"
-"    padding: 0 5px 0 5px;\n"
-"    color: #5A6475;\n"
-"}\n"
-"\n"
-"/* \u6309\u94ae\u901a\u7528\u6837\u5f0f */\n"
-"QPushButton {\n"
-"    background-color: #5B8DB8;\n"
-"    color: white;\n"
-"    border: none;\n"
-"    border-radius: 6px;\n"
-"    padding: 10px 16px;\n"
-"    font-weight: 500;\n"
-"    font-family: \"Segoe UI\", \"Microsoft YaHei\";\n"
-"    min-height: 24px;\n"
-"}\n"
-"\n"
-"QPushButton:hover {\n"
-"    background-color: #4A7A9F;\n"
-"}\n"
-"\n"
-"QPushB"
-                        "utton:pressed {\n"
-"    background-color: #3D6785;\n"
-"}\n"
-"\n"
-"QPushButton:disabled {\n"
-"    background-color: #8997A5;\n"
-"}\n"
-"\n"
-"/* \u6807\u7b7e\u6837\u5f0f */\n"
-"QLabel {\n"
-"    color: #5A6475;\n"
-"    font-family: \"Segoe UI\", \"Microsoft YaHei\";\n"
-"}\n"
-"\n"
-"/* \u7ec4\u5408\u6846\u6837\u5f0f */\n"
-"QComboBox {\n"
-"    padding: 8px 12px;\n"
-"    border: 1px solid #D4D9E0;\n"
-"    border-radius: 6px;\n"
-"    background-color: #FAFBFD;\n"
-"    font-family: \"Segoe UI\", \"Microsoft YaHei\";\n"
-"    min-height: 24px;\n"
-"}\n"
-"\n"
-"QComboBox:hover {\n"
-"    border-color: #5B8DB8;\n"
-"}\n"
-"\n"
-"QComboBox::drop-down {\n"
-"    border: none;\n"
-"    border-radius: 6px;\n"
-"}\n"
-"\n"
-"QComboBox::down-arrow {\n"
-"    image: url(:/icons/down_arrow.png);\n"
-"    width: 12px;\n"
-"    height: 12px;\n"
-"    margin-right: 8px;\n"
-"}\n"
-"\n"
-"/* \u8f93\u5165\u6846\u6837\u5f0f */\n"
-"QLineEdit {\n"
-"    padding: 8px 12px;\n"
-"    border: 1px solid #D4D9E0;\n"
-"    border-radius: 6px;\n"
-"    background-color"
-                        ": #FAFBFD;\n"
-"    font-family: \"Segoe UI\", \"Microsoft YaHei\";\n"
-"    selection-background-color: #5B8DB8;\n"
-"    selection-color: white;\n"
-"    min-height: 24px;\n"
-"}\n"
-"\n"
-"QLineEdit:focus {\n"
-"    border-color: #5B8DB8;\n"
-"    outline: none;\n"
-"}\n"
-"\n"
-"/* \u6ed1\u5757\u6837\u5f0f */\n"
-"QSlider::groove:horizontal {\n"
-"    height: 6px;\n"
-"    background: #E1E5EB;\n"
-"    border-radius: 3px;\n"
-"}\n"
-"\n"
-"QSlider::handle:horizontal {\n"
-"    background: #5B8DB8;\n"
-"    border: none;\n"
-"    width: 18px;\n"
-"    height: 18px;\n"
-"    margin: -6px 0;\n"
-"    border-radius: 9px;\n"
-"}\n"
-"\n"
-"QSlider::sub-page:horizontal {\n"
-"    background: #8997A5;\n"
-"    border-radius: 3px;\n"
-"}\n"
-"\n"
-"/* \u590d\u9009\u6846\u6837\u5f0f */\n"
-"QCheckBox {\n"
-"    color: #5A6475;\n"
-"    font-family: \"Segoe UI\", \"Microsoft YaHei\";\n"
-"    spacing: 8px;\n"
-"}\n"
-"\n"
-"QCheckBox::indicator {\n"
-"    width: 18px;\n"
-"    height: 18px;\n"
-"}\n"
-"\n"
-"/* \u5217\u8868\u89c6\u56fe\u6837\u5f0f */\n"
-"QList"
-                        "View {\n"
-"    border: 1px solid #D4D9E0;\n"
-"    border-radius: 6px;\n"
-"    background-color: #FAFBFD;\n"
-"    alternate-background-color: #F0F2F5;\n"
-"    font-family: \"Segoe UI\", \"Microsoft YaHei\";\n"
-"}\n"
-"\n"
-"QListView::item {\n"
-"    padding: 6px 8px;\n"
-"}\n"
-"\n"
-"QListView::item:selected {\n"
-"    background-color: #5B8DB8;\n"
-"    color: white;\n"
-"}\n"
-"\n"
-"/* LCD\u6570\u5b57\u663e\u793a\u6837\u5f0f */\n"
-"QLCDNumber {\n"
-"    color: #5B8DB8;\n"
-"    border: none;\n"
-"    background-color: transparent;\n"
-"}\n"
-"")
+        self.centralwidget.setStyleSheet(u"")
         self.horizontalLayout_3 = QHBoxLayout(self.centralwidget)
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
         self.left = QVBoxLayout()
@@ -345,49 +189,23 @@ class Ui_MainWindow(object):
 
         self.right = QGroupBox(self.centralwidget)
         self.right.setObjectName(u"right")
-        self.right.setStyleSheet(u"QGroupBox#right {\n"
-"     background-color: #FFFFFF;\n"
-"     border: 1px solid #E1E5EB;\n"
-"     border-radius: 8px;\n"
-"     margin-top: 1ex;\n"
-" }\n"
-"\n"
-" QGroupBox#right::title {\n"
-"     subcontrol-origin: margin;\n"
-"     left: 10px;\n"
-"     padding: 0 5px 0 5px;\n"
-"     color: #5A6475;\n"
-"     font-weight: 500;\n"
-" }")
+        self.right.setStyleSheet(u"")
         self.verticalLayout_3 = QVBoxLayout(self.right)
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
         self.toolbarWidget = QWidget(self.right)
         self.toolbarWidget.setObjectName(u"toolbarWidget")
-        self.toolbarWidget.setStyleSheet(u"QWidget#toolbarWidget {\n"
-"    background-color: #E9EEF5;\n"
-"    border: 1px solid #D4D9E0;\n"
-"    border-radius: 6px;\n"
-"    padding: 8px;\n"
-"}")
+        self.toolbarWidget.setStyleSheet(u"")
         self.horizontalLayout_4 = QHBoxLayout(self.toolbarWidget)
         self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
         self.selectedNum = QLCDNumber(self.toolbarWidget)
         self.selectedNum.setObjectName(u"selectedNum")
-        self.selectedNum.setStyleSheet(u"QLCDNumber {\n"
-"    color: #4285F4;\n"
-"    border: none;\n"
-"    background-color: transparent;\n"
-"}")
+        self.selectedNum.setStyleSheet(u"")
 
         self.horizontalLayout_4.addWidget(self.selectedNum)
 
         self.labelSelectedNum = QLabel(self.toolbarWidget)
         self.labelSelectedNum.setObjectName(u"labelSelectedNum")
-        self.labelSelectedNum.setStyleSheet(u"QLabel {\n"
-"    color: #5A6475;\n"
-"    font-family: \"Segoe UI\", \"Microsoft YaHei\";\n"
-"    font-weight: 500;\n"
-"}")
+        self.labelSelectedNum.setStyleSheet(u"")
 
         self.horizontalLayout_4.addWidget(self.labelSelectedNum)
 
@@ -397,37 +215,7 @@ class Ui_MainWindow(object):
 
         self.clearSelected = QToolButton(self.toolbarWidget)
         self.clearSelected.setObjectName(u"clearSelected")
-        self.clearSelected.setStyleSheet(u"/* --- \u5de5\u5177\u680f\u6309\u94ae QSS --- */\n"
-"\n"
-"QToolButton {\n"
-"    /* \u57fa\u7840\u6837\u5f0f */\n"
-"    background-color: #5B8DB8;        /* \u67d4\u548c\u84dd\u8272\u80cc\u666f */\n"
-"    color: #FFFFFF;                   /* \u767d\u8272\u6587\u5b57 */\n"
-"    border: none;                     /* \u65e0\u8fb9\u6846 */\n"
-"    border-radius: 6px;               /* \u5706\u6da6\u8fb9\u89d2 */\n"
-"    padding: 8px 16px;                /* \u8212\u9002\u5185\u8fb9\u8ddd */\n"
-"    font-weight: 500;                 /* \u4e2d\u7b49\u5b57\u4f53\u7c97\u7ec6 */\n"
-"    font-family: \"Segoe UI\", \"Microsoft YaHei\"; /* \u73b0\u4ee3\u5b57\u4f53 */\n"
-"    min-width: 80px;\n"
-"}\n"
-"\n"
-"QToolButton:hover {\n"
-"    /* \u9f20\u6807\u60ac\u505c\u72b6\u6001 */\n"
-"    background-color: #4A7A9F;        /* \u6df1\u4e00\u53f7\u7684\u60ac\u505c\u8272 */\n"
-"}\n"
-"\n"
-"QToolButton:pressed {\n"
-"    /* \u9f20\u6807\u6309\u4e0b\u72b6\u6001 */\n"
-"    background-color: #3D6785;        /* \u66f4\u6df1\u7684\u6309\u4e0b"
-                        "\u8272 */\n"
-"}\n"
-"\n"
-"QToolButton:disabled {\n"
-"    /* \u7981\u7528\u72b6\u6001 */\n"
-"    background-color: #8997A5;        /* \u6d45\u7070\u8272\u7981\u7528\u72b6\u6001 */\n"
-"    color: #CED4DA;\n"
-"}\n"
-"")
+        self.clearSelected.setStyleSheet(u"")
         icon = QIcon(QIcon.fromTheme(QIcon.ThemeIcon.EditDelete))
         self.clearSelected.setIcon(icon)
 
@@ -435,37 +223,7 @@ class Ui_MainWindow(object):
 
         self.clearAll = QToolButton(self.toolbarWidget)
         self.clearAll.setObjectName(u"clearAll")
-        self.clearAll.setStyleSheet(u"/* --- \u5de5\u5177\u680f\u6309\u94ae QSS --- */\n"
-"\n"
-"QToolButton {\n"
-"    /* \u57fa\u7840\u6837\u5f0f */\n"
-"    background-color: #5B8DB8;        /* \u67d4\u548c\u84dd\u8272\u80cc\u666f */\n"
-"    color: #FFFFFF;                   /* \u767d\u8272\u6587\u5b57 */\n"
-"    border: none;                     /* \u65e0\u8fb9\u6846 */\n"
-"    border-radius: 6px;               /* \u5706\u6da6\u8fb9\u89d2 */\n"
-"    padding: 8px 16px;                /* \u8212\u9002\u5185\u8fb9\u8ddd */\n"
-"    font-weight: 500;                 /* \u4e2d\u7b49\u5b57\u4f53\u7c97\u7ec6 */\n"
-"    font-family: \"Segoe UI\", \"Microsoft YaHei\"; /* \u73b0\u4ee3\u5b57\u4f53 */\n"
-"    min-width: 80px;\n"
-"}\n"
-"\n"
-"QToolButton:hover {\n"
-"    /* \u9f20\u6807\u60ac\u505c\u72b6\u6001 */\n"
-"    background-color: #4A7A9F;        /* \u6df1\u4e00\u53f7\u7684\u60ac\u505c\u8272 */\n"
-"}\n"
-"\n"
-"QToolButton:pressed {\n"
-"    /* \u9f20\u6807\u6309\u4e0b\u72b6\u6001 */\n"
-"    background-color: #3D6785;        /* \u66f4\u6df1\u7684\u6309\u4e0b"
-                        "\u8272 */\n"
-"}\n"
-"\n"
-"QToolButton:disabled {\n"
-"    /* \u7981\u7528\u72b6\u6001 */\n"
-"    background-color: #8997A5;        /* \u6d45\u7070\u8272\u7981\u7528\u72b6\u6001 */\n"
-"    color: #CED4DA;\n"
-"}\n"
-"")
+        self.clearAll.setStyleSheet(u"")
         icon1 = QIcon(QIcon.fromTheme(QIcon.ThemeIcon.EditClear))
         self.clearAll.setIcon(icon1)
 
@@ -476,24 +234,7 @@ class Ui_MainWindow(object):
 
         self.imageList = QListView(self.right)
         self.imageList.setObjectName(u"imageList")
-        self.imageList.setStyleSheet(u"QListView {\n"
-"    border: 1px solid #D4D9E0;\n"
-"    border-radius: 6px;\n"
-"    background-color: #FAFBFD;\n"
-"    alternate-background-color: #F0F2F5;\n"
-"    font-family: \"Segoe UI\", \"Microsoft YaHei\";\n"
-"    margin-top: 8px;\n"
-"}\n"
-"\n"
-"QListView::item {\n"
-"    padding: 6px 8px;\n"
-"    border-bottom: 1px solid #E1E5EB;\n"
-"}\n"
-"\n"
-"QListView::item:selected {\n"
-"    background-color: #4285F4;\n"
-"    color: white;\n"
-"}")
+        self.imageList.setStyleSheet(u"")
 
         self.verticalLayout_3.addWidget(self.imageList)
 
@@ -505,62 +246,12 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")
-        self.statusbar.setStyleSheet(u"QStatusBar {\n"
-"    background-color: #F0F2F5;\n"
-"    border-top: 1px solid #E1E5EB;\n"
-"    font-family: \"Segoe UI\", \"Microsoft YaHei\";\n"
-"}\n"
-"\n"
-"QStatusBar::item {\n"
-"    border: none;\n"
-"}")
+        self.statusbar.setStyleSheet(u"")
         MainWindow.setStatusBar(self.statusbar)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
         self.menubar.setGeometry(QRect(0, 0, 800, 30))
-        self.menubar.setStyleSheet(u"QMenuBar {\n"
-"    background-color: #FFFFFF;\n"
-"    border-bottom: 1px solid #E1E5EB;\n"
-"    font-family: \"Segoe UI\", \"Microsoft YaHei\";\n"
-"}\n"
-"\n"
-"QMenuBar::item {\n"
-"    background: transparent;\n"
-"    padding: 6px 12px;\n"
-"    color: #5A6475;\n"
-"}\n"
-"\n"
-"QMenuBar::item:selected {\n"
-"    background: #E9EEF5;\n"
-"}\n"
-"\n"
-"QMenuBar::item:pressed {\n"
-"    background: #5B8DB8;\n"
-"    color: white;\n"
-"}\n"
-"\n"
-"QMenu {\n"
-"    background-color: #FFFFFF;\n"
-"    border: 1px solid #E1E5EB;\n"
-"    border-radius: 6px;\n"
-"    padding: 4px 0px;\n"
-"    font-family: \"Segoe UI\", \"Microsoft YaHei\";\n"
-"}\n"
-"\n"
-"QMenu::item {\n"
-"    padding: 6px 24px;\n"
-"    color: #5A6475;\n"
-"}\n"
-"\n"
-"QMenu::item:selected {\n"
-"    background-color: #E9EEF5;\n"
-"}\n"
-"\n"
-"QMenu::separator {\n"
-"    height: 1px;\n"
-"    background: #E1E5EB;\n"
-"    margin: 4px 0px;\n"
-"}")
+        self.menubar.setStyleSheet(u"")
         MainWindow.setMenuBar(self.menubar)
 
         self.retranslateUi(MainWindow)

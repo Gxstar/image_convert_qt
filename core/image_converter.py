@@ -36,6 +36,9 @@ class ImageConverter:
                 # 提取EXIF信息
                 exif_data = img.getexif()
                 
+                # 提取DPI信息
+                dpi_info = img.info.get('dpi', None)
+                
                 # 处理RGBA到RGB的转换（JPEG不支持透明度）
                 if format_name.upper() == 'JPEG' and img.mode in ('RGBA', 'LA', 'P'):
                     # 创建白色背景
@@ -47,6 +50,10 @@ class ImageConverter:
                 
                 # 准备保存参数
                 save_kwargs = self._prepare_save_params(format_name, quality)
+                
+                # 添加DPI信息到保存参数
+                if dpi_info:
+                    save_kwargs['dpi'] = dpi_info
                 
                 # HEIC格式的特殊处理
                 if format_name.upper() == 'HEIC':
