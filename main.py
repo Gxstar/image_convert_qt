@@ -59,7 +59,7 @@ class MainWindow(QMainWindow):
             self, 
             "选择图片", 
             "", 
-            "图片文件 (*.png *.jpg *.jpeg *.bmp *.tiff *.tif *.webp *.heic *.heif *.avif *.gif *.jp2 *.j2k)"
+            "图片文件 (*.png *.jpg *.jpeg *.bmp *.tiff *.tif *.webp *.heic *.heif *.avif *.gif *.jp2 *.j2k *.cr2 *.cr3 *.nef *.nrw *.arw *.dng *.orf *.rw2 *.pef *.raf *.raw)"
         )
         
         if file_paths:
@@ -70,8 +70,13 @@ class MainWindow(QMainWindow):
         """选择图片目录"""
         directory = QFileDialog.getExistingDirectory(self, "选择目录")
         if directory:
-            # 定义支持的图片扩展名（当前最常用格式）
-            image_extensions = ['*.png', '*.jpg', '*.jpeg', '*.bmp', '*.tiff', '*.tif', '*.webp', '*.heic', '*.heif', '*.avif', '*.gif', '*.jp2', '*.j2k']
+            # 定义支持的图片扩展名（包括RAW格式）
+            image_extensions = [
+                '*.png', '*.jpg', '*.jpeg', '*.bmp', '*.tiff', '*.tif', '*.webp', 
+                '*.heic', '*.heif', '*.avif', '*.gif', '*.jp2', '*.j2k',
+                '*.cr2', '*.cr3', '*.nef', '*.nrw', '*.arw', '*.dng', 
+                '*.orf', '*.rw2', '*.pef', '*.raf', '*.raw'
+            ]
             image_paths = []
             for extension in image_extensions:
                 # 使用glob查找文件

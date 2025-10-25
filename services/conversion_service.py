@@ -121,6 +121,15 @@ class ConversionService:
         """
         return self.converter.get_supported_formats()
     
+    def get_supported_input_formats(self):
+        """
+        获取支持的输入格式（包括RAW文件）
+        
+        Returns:
+            list: 支持的输入格式列表
+        """
+        return self.converter.get_supported_input_formats()
+    
     def _find_conflict_files(self, directory, filename_stem):
         """
         查找与指定文件名主体冲突的文件（忽略后缀名）

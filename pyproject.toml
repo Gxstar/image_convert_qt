@@ -8,4 +8,5 @@ dependencies = [
     "pillow>=12.0.0",
     "pillow-heif>=1.1.1",
     "pyside6>=6.10.0",
+    "rawpy>=0.25.1",
 ]
