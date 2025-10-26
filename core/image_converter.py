@@ -25,7 +25,7 @@ class ImageConverter:
         """初始化图片转换器"""
         pass
     
-    def convert(self, input_path, output_path, format_name, quality=85):
+    def convert(self, input_path, output_path, format_name, quality=85, bit_depth=None):
         """
         转换图片格式
         
@@ -34,6 +34,7 @@ class ImageConverter:
             output_path: 输出文件路径
             format_name: 输出格式名称
             quality: JPEG/WebP质量 (1-100)
+            bit_depth: 位深设置 (8, 10, 12, 16)
             
         Returns:
             tuple: (是否成功, 错误信息)
@@ -43,6 +44,10 @@ class ImageConverter:
             img, exif_data, dpi_info = self._load_image_and_metadata(input_path)
             if img is None:
                 return False, "无法加载图像文件"
+            
+            # 位深处理
+            if bit_depth is not None:
+                img = self._apply_bit_depth(img, bit_depth, format_name)
             
             # 处理RGBA到RGB的转换（JPEG不支持透明度）
             if format_name.upper() == 'JPEG' and img.mode in ('RGBA', 'LA', 'P'):
@@ -164,6 +169,59 @@ class ImageConverter:
             
         return save_kwargs
     
+    def _apply_bit_depth(self, img, bit_depth, format_name):
+        """
+        应用位深设置到图像
+        
+        Args:
+            img: PIL图像对象
+            bit_depth: 目标位深 (8, 10, 12, 16)
+            format_name: 输出格式名称
+            
+        Returns:
+            PIL.Image: 处理后的图像
+        """
+        # 检查位深是否有效
+        valid_bit_depths = {8, 10, 12, 16}
+        if bit_depth not in valid_bit_depths:
+            return img
+        
+        # 获取当前图像的位深
+        current_mode = img.mode
+        current_bit_depth = 8  # 默认假设为8位
+        
+        # 根据图像模式确定当前位深
+        if current_mode in ('I;16', 'I;16B', 'I;16L', 'I;16N'):
+            current_bit_depth = 16
+        elif current_mode in ('I', 'F'):
+            current_bit_depth = 32  # 32位整数或浮点数
+        
+        # 如果目标位深与当前位深相同，无需处理
+        if current_bit_depth == bit_depth:
+            return img
+        
+        # 根据目标位深进行转换
+        if bit_depth == 8:
+            # 转换为8位
+            if img.mode in ('I;16', 'I;16B', 'I;16L', 'I;16N'):
+                # 16位图像转换为8位
+                img = img.point(lambda i: i // 256)
+                img = img.convert('L')
+            elif img.mode in ('I', 'F'):
+                # 32位图像转换为8位
+                img = img.convert('L')
+        elif bit_depth == 16:
+            # 转换为16位
+            if img.mode == 'L':
+                # 8位灰度图像转换为16位
+                img = img.convert('I;16')
+            elif img.mode == 'RGB':
+                # 8位RGB图像转换为16位RGB
+                # 注意：PIL没有直接的16位RGB模式，需要特殊处理
+                img = img.convert('RGB')
+        
+        return img
+    
     def _is_raw_file(self, file_path):
         """
         检查文件是否为RAW格式
@@ -259,6 +317,5 @@ class ImageConverter:
         if HEIF_SUPPORTED:
             # 添加HEIF相关的格式
             base_formats.extend(['HEIC', 'HEIF', 'AVIF'])
-        if RAW_SUPPORTED:
-            base_formats.append('RAW')  # 表示支持RAW文件输入
+        # 移除RAW格式作为输出选项，只保留常用图片格式
         return base_formats

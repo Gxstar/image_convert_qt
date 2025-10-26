@@ -14,7 +14,7 @@ class ConversionService:
         self.converter = ImageConverter()
         self.parent_window = None
     
-    def convert_images(self, image_files, output_dir, output_format, quality=85, replace=False, progress_callback=None, parent_window=None, user_decisions=None):
+    def convert_images(self, image_files, output_dir, output_format, quality=85, bit_depth=None, replace=False, progress_callback=None, parent_window=None, user_decisions=None):
         """
         转换图片文件
         
@@ -23,6 +23,7 @@ class ConversionService:
             output_dir: 输出目录
             output_format: 输出格式
             quality: 图片质量 (1-100)
+            bit_depth: 位深设置 (8, 10, 12, 16)
             replace: 是否替换同名文件
             progress_callback: 进度回调函数
             parent_window: 父窗口，用于显示对话框
@@ -94,7 +95,7 @@ class ConversionService:
                     continue
                 
                 # 执行转换
-                success, error = self.converter.convert(image_path, output_path, output_format, quality)
+                success, error = self.converter.convert(image_path, output_path, output_format, quality, bit_depth)
                 
                 if success:
                     success_count += 1
