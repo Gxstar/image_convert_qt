@@ -74,6 +74,16 @@ class Ui_MainWindow(object):
 
         self.format.addWidget(self.formatSelection)
 
+        self.bitSelect = QLabel(self.outputBox)
+        self.bitSelect.setObjectName(u"bitSelect")
+
+        self.format.addWidget(self.bitSelect)
+
+        self.bitValue = QComboBox(self.outputBox)
+        self.bitValue.setObjectName(u"bitValue")
+
+        self.format.addWidget(self.bitValue)
+
 
         self.verticalLayout_4.addLayout(self.format)
 
@@ -265,6 +275,7 @@ class Ui_MainWindow(object):
         self.addDirs.setText(QCoreApplication.translate("MainWindow", u"\u9009\u62e9\u6587\u4ef6\u5939", None))
         self.outputBox.setTitle(QCoreApplication.translate("MainWindow", u"\u8f93\u51fa\u9009\u9879", None))
         self.outFormatTitle.setText(QCoreApplication.translate("MainWindow", u"\u8f93\u51fa\u683c\u5f0f\u9009\u62e9", None))
+        self.bitSelect.setText(QCoreApplication.translate("MainWindow", u"\u8f93\u51fa\u56fe\u7247\u4f4d\u6df1", None))
         self.outDirTitle.setText(QCoreApplication.translate("MainWindow", u"\u8f93\u51fa\u8def\u5f84\u9009\u62e9", None))
         self.outDirSelect.setText(QCoreApplication.translate("MainWindow", u"\u9009\u62e9\u76ee\u5f55", None))
         self.qualityTitle.setText(QCoreApplication.translate("MainWindow", u"\u8f93\u51fa\u8d28\u91cf", None))

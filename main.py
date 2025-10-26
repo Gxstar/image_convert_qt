@@ -26,6 +26,9 @@ class MainWindow(QMainWindow):
         self.loader_service = ImageLoaderService()
         self.image_list_manager = ImageListManager(self.ui.imageList)
         
+        # 初始化变量
+        self.bit_depth = None
+        
         # 连接信号和槽
         self._connect_signals()
         
@@ -45,6 +48,7 @@ class MainWindow(QMainWindow):
         # 输出相关
         self.ui.outDirSelect.clicked.connect(self._select_output_directory)
         self.ui.qualityValue.valueChanged.connect(self._update_quality_display)
+        self.ui.formatSelection.currentTextChanged.connect(self._update_bit_depth_options)
         
         # 图片列表相关
         self.ui.clearSelected.clicked.connect(self._remove_selected)
@@ -123,6 +127,32 @@ class MainWindow(QMainWindow):
         self.ui.formatSelection.clear()
         self.ui.formatSelection.addItems(formats)
         
+        # 更新位深选项
+        self._update_bit_depth_options(self.ui.formatSelection.currentText())
+        
+    def _update_bit_depth_options(self, format_name):
+        """根据格式更新位深选项"""
+        # 清空现有选项
+        self.ui.bitValue.clear()
+        
+        # 根据格式设置位深选项
+        if format_name.upper() in ['JPEG', 'WEBP']:
+            # JPEG和WEBP只支持8位
+            self.ui.bitValue.addItems(["自动", "8位"])
+            self.ui.bitValue.setCurrentText("8位")
+        elif format_name.upper() in ['PNG', 'TIFF']:
+            # PNG和TIFF支持8位和16位
+            self.ui.bitValue.addItems(["自动", "8位", "16位"])
+            self.ui.bitValue.setCurrentText("自动")
+        elif format_name.upper() in ['AVIF', 'HEIC', 'HEIF']:
+            # AVIF、HEIC、HEIF支持8位、10位和12位
+            self.ui.bitValue.addItems(["自动", "8位", "10位", "12位"])
+            self.ui.bitValue.setCurrentText("自动")
+        else:
+            # 其他格式默认只支持8位
+            self.ui.bitValue.addItems(["自动", "8位"])
+            self.ui.bitValue.setCurrentText("自动")
+        
     def _load_settings(self):
         """加载设置"""
         # 输出目录
@@ -155,6 +185,18 @@ class MainWindow(QMainWindow):
         format_ext = self.ui.formatSelection.currentText()
         quality = self.ui.qualityValue.value()
         replace = self.ui.isReplace.isChecked()
+        
+        # 获取位深参数
+        bit_depth_text = self.ui.bitValue.currentText()
+        bit_depth = None
+        if bit_depth_text and bit_depth_text != "自动":
+            # 从文本中提取数字
+            if "位" in bit_depth_text:
+                bit_depth_str = bit_depth_text.replace("位", "")
+                try:
+                    bit_depth = int(bit_depth_str)
+                except ValueError:
+                    bit_depth = None
         
         # 获取图片文件列表
         image_files = self.image_list_manager.get_file_paths()
@@ -190,13 +232,14 @@ class MainWindow(QMainWindow):
             progress_signal = Signal(int, int, str)
             complete_signal = Signal(int, int, object)
             
-            def __init__(self, conversion_service, image_files, output_dir, format_ext, quality, replace, user_decisions, parent_window=None):
+            def __init__(self, conversion_service, image_files, output_dir, format_ext, quality, bit_depth, replace, user_decisions, parent_window=None):
                 super().__init__()
                 self.conversion_service = conversion_service
                 self.image_files = image_files
                 self.output_dir = output_dir
                 self.format_ext = format_ext
                 self.quality = quality
+                self.bit_depth = bit_depth
                 self.replace = replace
                 self.user_decisions = user_decisions
                 self.parent_window = parent_window
@@ -214,6 +257,7 @@ class MainWindow(QMainWindow):
                     self.output_dir,
                     self.format_ext,
                     self.quality,
+                    self.bit_depth,  # 传递位深参数
                     self.replace,
                     progress_callback,
                     self.parent_window,
@@ -228,6 +272,7 @@ class MainWindow(QMainWindow):
             output_dir,
             format_ext,
             quality,
+            bit_depth,  # 传递位深参数
             replace,
             user_decisions,  # 传递用户决策
             self  # 传递父窗口引用

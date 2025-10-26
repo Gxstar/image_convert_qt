@@ -87,6 +87,16 @@
              </property>
             </widget>
            </item>
+           <item>
+            <widget class="QLabel" name="bitSelect">
+             <property name="text">
+              <string>输出图片位深</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="bitValue"/>
+           </item>
           </layout>
          </item>
          <item>
