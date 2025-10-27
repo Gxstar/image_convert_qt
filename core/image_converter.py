@@ -291,7 +291,7 @@ class ImageConverter:
             
         try:
             with rawpy.imread(file_path) as raw:
-                # 使用16位原始数据
+                # 使用16位原始数据，保持最高质量
                 rgb = raw.postprocess(
                     output_bps=16,
                     use_camera_wb=True,
@@ -299,35 +299,8 @@ class ImageConverter:
                     output_color=rawpy.ColorSpace.sRGB
                 )
                 
-                # 根据目标位深进行精确缩放
-                if target_bit_depth == 8:
-                    # 16位转8位：除以256（保留高8位）
-                    rgb = (rgb // 256).astype(np.uint8)
-                elif target_bit_depth == 10:
-                    # 16位转10位：缩放至0-1023范围
-                    # 确保数据在正确范围内
-                    rgb = np.clip(rgb // 64, 0, 1023).astype(np.uint16)
-                elif target_bit_depth == 12:
-                    # 16位转12位：缩放至0-4095范围
-                    rgb = np.clip(rgb // 16, 0, 4095).astype(np.uint16)
-                # 16位保持不变
-                
-                # 确保数据格式正确：RGB顺序，uint8或uint16
-                # pillow_heif期望的数据格式是标准的RGB或RGBA
-                if rgb.dtype == np.uint8:
-                    # 8位数据已经是正确的格式
-                    pass
-                elif rgb.dtype == np.uint16:
-                    # 16位数据需要确保在正确的位深范围内
-                    if target_bit_depth == 10:
-                        # 10位数据：0-1023
-                        rgb = np.clip(rgb, 0, 1023)
-                    elif target_bit_depth == 12:
-                        # 12位数据：0-4095
-                        rgb = np.clip(rgb, 0, 4095)
-                    # 16位数据：0-65535，已经是正确的范围
-                
-                # 直接返回numpy数组，不转换为PIL图像
+                # 返回原始16位数据，位深转换在保存时处理
+                # 这样可以保持最高数据质量，避免多次转换损失
                 return rgb
         except Exception as e:
             print(f"RAW文件处理错误: {e}")
@@ -428,7 +401,7 @@ class ImageConverter:
             print(f"pillow_heif保存PIL图像错误: {e}")
             return False
     
-    def _save_numpy_array(self, image_data, output_path, format_name, quality=85):
+    def _save_numpy_array(self, image_data, output_path, format_name, quality=85, bit_depth=None):
         """保存numpy数组数据为图像文件
         
         Args:
@@ -436,6 +409,7 @@ class ImageConverter:
             output_path: 输出文件路径
             format_name: 输出格式名称
             quality: 质量参数
+            bit_depth: 位深设置 (8, 10, 12, 16)
             
         Returns:
             bool: 是否保存成功
@@ -448,10 +422,49 @@ class ImageConverter:
             save_kwargs = {}
             if format_name.upper() in ['JPEG', 'WEBP']:
                 save_kwargs['quality'] = quality
-            # 使用imageio保存图像
-            imageio.imwrite(output_path, image_data, format=format_name.lower(), **save_kwargs)
+            
+            # 处理位深转换：只在保存时进行位深转换，避免多次转换损失
+            if bit_depth is not None and bit_depth in {8, 10, 12, 16}:
+                # 获取当前位深
+                current_bit_depth = 16 if image_data.dtype == np.uint16 else 8
+                
+                # 执行位深转换
+                if current_bit_depth != bit_depth:
+                    if bit_depth == 8:
+                        # 16位转8位：除以256
+                        image_data = (image_data // 256).astype(np.uint8)
+                    elif bit_depth == 10:
+                        # 16位转10位：除以64，限制在0-1023范围
+                        image_data = np.clip(image_data // 64, 0, 1023).astype(np.uint16)
+                    elif bit_depth == 12:
+                        # 16位转12位：除以16，限制在0-4095范围
+                        image_data = np.clip(image_data // 16, 0, 4095).astype(np.uint16)
+                    # 16位保持不变
+            
+            # 处理Pillow兼容性：确保uint16数据在标准范围内
+            if image_data.dtype == np.uint16:
+                # 检测数据范围
+                max_val = np.max(image_data)
+                if max_val <= 1023:
+                    # 10位数据：扩展到16位范围 (0-1023 -> 0-65535)
+                    image_data = (image_data * 64).astype(np.uint16)
+                elif max_val <= 4095:
+                    # 12位数据：扩展到16位范围 (0-4095 -> 0-65535)
+                    image_data = (image_data * 16).astype(np.uint16)
+                # 标准16位数据 (0-65535) 保持不变
+            
             # 使用pillow保存图像
-            # pil_image = Image.fromarray(image_data)
+            # Pillow无法处理3D的uint16数组，需要正确的处理方式
+            if image_data.ndim == 3 and image_data.dtype == np.uint16:
+                # 对于uint16的3D数组，需要转换为uint8或者使用其他方法
+                # 这里我们选择转换为uint8来避免Pillow的限制
+                if np.max(image_data) <= 255:
+                    image_data = image_data.astype(np.uint8)
+                else:
+                    # 如果数据范围超过255，则缩放到8位
+                    image_data = (image_data // 256).astype(np.uint8)
+            
+            pil_image = Image.fromarray(image_data)
             pil_image.save(output_path, format=format_name.upper(), **save_kwargs)
             return True
         except Exception as e:
