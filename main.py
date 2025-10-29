@@ -138,20 +138,20 @@ class MainWindow(QMainWindow):
         # 根据格式设置位深选项
         if format_name.upper() in ['JPEG', 'WEBP']:
             # JPEG和WEBP只支持8位
-            self.ui.bitValue.addItems(["自动", "8位"])
+            self.ui.bitValue.addItems(["8位"])
             self.ui.bitValue.setCurrentText("8位")
         elif format_name.upper() in ['PNG', 'TIFF']:
             # PNG和TIFF支持8位和16位
-            self.ui.bitValue.addItems(["自动", "8位", "16位"])
-            self.ui.bitValue.setCurrentText("自动")
+            self.ui.bitValue.addItems(["8位", "16位"])
+            self.ui.bitValue.setCurrentText("8位")
         elif format_name.upper() in ['AVIF', 'HEIC', 'HEIF']:
-            # AVIF、HEIC、HEIF支持8位、10位和12位
-            self.ui.bitValue.addItems(["自动", "8位", "10位", "12位"])
-            self.ui.bitValue.setCurrentText("自动")
+            # AVIF、HEIC、HEIF支持8位、10位、12位和16位
+            self.ui.bitValue.addItems(["8位", "10位", "12位", "16位"])
+            self.ui.bitValue.setCurrentText("8位")
         else:
             # 其他格式默认只支持8位
-            self.ui.bitValue.addItems(["自动", "8位"])
-            self.ui.bitValue.setCurrentText("自动")
+            self.ui.bitValue.addItems(["8位"])
+            self.ui.bitValue.setCurrentText("8位")
         
     def _load_settings(self):
         """加载设置"""
@@ -188,15 +188,15 @@ class MainWindow(QMainWindow):
         
         # 获取位深参数
         bit_depth_text = self.ui.bitValue.currentText()
-        bit_depth = None
-        if bit_depth_text and bit_depth_text != "自动":
+        bit_depth = 8  # 默认设置为8位
+        if bit_depth_text:
             # 从文本中提取数字
             if "位" in bit_depth_text:
                 bit_depth_str = bit_depth_text.replace("位", "")
                 try:
                     bit_depth = int(bit_depth_str)
                 except ValueError:
-                    bit_depth = None
+                    bit_depth = 8
         
         # 获取图片文件列表
         image_files = self.image_list_manager.get_file_paths()
