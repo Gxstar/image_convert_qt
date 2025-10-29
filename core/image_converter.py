@@ -18,13 +18,6 @@ try:
 except ImportError:
     RAW_SUPPORTED = False
 
-# 注册imageio支持
-try:
-    import imageio
-    IMAGEIO_SUPPORTED = True
-except ImportError:
-    IMAGEIO_SUPPORTED = False
-
 
 class ImageConverter:
     """图片格式转换器"""
@@ -55,22 +48,25 @@ class ImageConverter:
             
             format_upper = format_name.upper()
             
-            # 处理HEIF格式（AVIF、HEIF、HEIC）
-            if format_upper in ['AVIF', 'HEIF', 'HEIC'] and HEIF_SUPPORTED:
+            # 根据输出格式分类处理
+            if format_upper in ['AVIF', 'HEIF', 'HEIC']:
+                # HEIF格式处理 - 维持当前逻辑
                 return self._handle_heif_format(img_data, output_path, format_upper, quality, bit_depth, is_raw)
-            
-            # 处理RAW文件（非HEIF格式）
-            if is_raw:
-                return self._handle_raw_format(img_data, output_path, format_name, quality)
-            
-            # 处理普通图像文件
-            return self._handle_regular_format(img_data, output_path, format_name, quality, bit_depth, exif_data, dpi_info)
+            elif format_upper in ['PNG', 'TIFF']:
+                # PNG/TIFF格式 - 支持16位精度
+                return self._handle_16bit_format(img_data, output_path, format_upper, quality, bit_depth, exif_data, dpi_info, is_raw)
+            else:
+                # JPEG/WEBP等格式 - 转换为8位
+                return self._handle_8bit_format(img_data, output_path, format_upper, quality, exif_data, dpi_info, is_raw)
             
         except Exception as e:
             return False, str(e)
     
     def _handle_heif_format(self, img_data, output_path, format_upper, quality, bit_depth, is_raw):
-        """处理HEIF格式转换"""
+        """处理HEIF格式转换 - 维持当前逻辑"""
+        if not HEIF_SUPPORTED:
+            return False, "pillow_heif库未安装，无法处理HEIF格式"
+            
         # 对于RAW文件或numpy数组数据
         if is_raw or isinstance(img_data, np.ndarray):
             success = self._save_with_pillow_heif(img_data, output_path, format_upper, quality, bit_depth)
@@ -80,57 +76,142 @@ class ImageConverter:
             success = self._save_pil_with_pillow_heif(img_data, output_path, format_upper, quality)
             return (True, "") if success else (False, "pillow_heif保存失败")
     
-    def _handle_raw_format(self, img_data, output_path, format_name, quality):
-        """处理RAW文件格式转换"""
-        if not IMAGEIO_SUPPORTED:
-            return False, "imageio库未安装，无法保存RAW转换结果"
-        
-        success = self._save_numpy_array(img_data, output_path, format_name, quality)
-        return (True, "") if success else (False, "numpy数组保存失败")
+    def _handle_16bit_format(self, img_data, output_path, format_upper, quality, bit_depth, exif_data, dpi_info, is_raw):
+        """处理支持16位精度的格式（PNG、TIFF）"""
+        try:
+            # 对于RAW文件，直接使用numpy数组数据
+            if is_raw or isinstance(img_data, np.ndarray):
+                # 确保数据是16位
+                if img_data.dtype == np.uint8:
+                    # 8位转16位
+                    img_data = (img_data.astype(np.uint16) * 256).astype(np.uint16)
+                elif img_data.dtype != np.uint16:
+                    # 其他类型转为16位
+                    img_data = img_data.astype(np.uint16)
+                
+                # 根据位深设置进行精确转换
+                if bit_depth is not None:
+                    if bit_depth == 8:
+                        img_data = (img_data // 256).astype(np.uint8)
+                    elif bit_depth == 10:
+                        img_data = np.clip(img_data // 64, 0, 1023).astype(np.uint16)
+                    elif bit_depth == 12:
+                        img_data = np.clip(img_data // 16, 0, 4095).astype(np.uint16)
+                
+                # 使用PIL保存16位数据
+                if img_data.dtype == np.uint8:
+                    # 8位数据
+                    if img_data.ndim == 2:
+                        pil_img = Image.fromarray(img_data, 'L')
+                    elif img_data.ndim == 3:
+                        if img_data.shape[2] == 3:
+                            pil_img = Image.fromarray(img_data, 'RGB')
+                        elif img_data.shape[2] == 4:
+                            pil_img = Image.fromarray(img_data, 'RGBA')
+                        else:
+                            pil_img = Image.fromarray(img_data, 'RGB')
+                    else:
+                        return False, "不支持的图像维度"
+                else:
+                    # 16位数据
+                    if img_data.ndim == 2:
+                        pil_img = Image.fromarray(img_data, 'I;16')
+                    elif img_data.ndim == 3:
+                        # 对于彩色16位图像，需要转换为灰度模式，因为PIL不支持16位RGB
+                        # 或者使用其他方法处理
+                        if img_data.shape[2] == 3:
+                            # 将RGB转换为灰度
+                            gray_data = np.dot(img_data[...,:3], [0.2989, 0.5870, 0.1140])
+                            pil_img = Image.fromarray(gray_data.astype(np.uint16), 'I;16')
+                        else:
+                            # 其他情况使用第一个通道
+                            pil_img = Image.fromarray(img_data[:,:,0], 'I;16')
+                    else:
+                        return False, "不支持的图像维度"
+                    
+            else:
+                # 对于PIL图像
+                pil_img = img_data
+                
+                # 应用位深转换
+                if bit_depth is not None and bit_depth in {8, 10, 12, 16}:
+                    pil_img = self._apply_bit_depth(pil_img, bit_depth)
+            
+            # 准备保存参数
+            save_kwargs = {'format': format_upper}
+            
+            if format_upper == 'PNG':
+                save_kwargs['optimize'] = True
+            elif format_upper == 'TIFF':
+                save_kwargs['compression'] = 'tiff_lzw'
+            
+            # 添加DPI和EXIF信息
+            if dpi_info:
+                save_kwargs['dpi'] = dpi_info
+            if exif_data:
+                save_kwargs['exif'] = exif_data
+            
+            pil_img.save(output_path, **save_kwargs)
+            return True, ""
+            
+        except Exception as e:
+            return False, f"16位格式保存错误: {e}"
     
-    def _handle_regular_format(self, img_data, output_path, format_name, quality, bit_depth, exif_data, dpi_info):
-        """处理普通图像文件格式转换"""
-        img = img_data
-        format_upper = format_name.upper()
-        
-        # 应用位深转换
-        if bit_depth is not None and bit_depth in {8, 10, 12, 16}:
-            img = self._apply_bit_depth(img, bit_depth)
-        
-        # 处理JPEG透明度问题
-        if format_upper == 'JPEG' and img.mode in ('RGBA', 'LA', 'P'):
-            background = Image.new('RGB', img.size, (255, 255, 255))
-            if img.mode == 'P':
-                img = img.convert('RGBA')
-            background.paste(img, mask=img.split()[-1] if img.mode == 'RGBA' else None)
-            img = background
-        
-        # 准备保存参数
-        save_kwargs = {'format': format_upper}
-        
-        if format_upper in ['JPEG', 'WEBP']:
-            save_kwargs.update({'quality': quality, 'optimize': True})
-        elif format_upper == 'PNG':
-            save_kwargs['optimize'] = True
-        
-        # 处理HEIC格式
-        if format_upper == 'HEIC':
-            if not output_path.lower().endswith(('.heic', '.heics')):
-                base_name = os.path.splitext(output_path)[0]
-                output_path = base_name + '.heic'
-            save_kwargs['format'] = 'HEIF'
-            if 'quality' in save_kwargs:
-                quality_val = save_kwargs['quality']
-                save_kwargs['quality'] = -1 if quality_val == -1 else max(0, min(100, quality_val))
-        
-        # 添加DPI和EXIF信息
-        if dpi_info:
-            save_kwargs['dpi'] = dpi_info
-        if exif_data and format_upper != 'HEIC':
-            save_kwargs['exif'] = exif_data
-        
-        img.save(output_path, **save_kwargs)
-        return True, ""
+    def _handle_8bit_format(self, img_data, output_path, format_upper, quality, exif_data, dpi_info, is_raw):
+        """处理只支持8位的格式（JPEG、WEBP等）"""
+        try:
+            # 对于RAW文件或numpy数组数据，转换为8位
+            if is_raw or isinstance(img_data, np.ndarray):
+                # 转换为8位
+                if img_data.dtype == np.uint16:
+                    img_data = (img_data // 256).astype(np.uint8)
+                elif img_data.dtype != np.uint8:
+                    img_data = img_data.astype(np.uint8)
+                
+                # 转换为PIL图像
+                if img_data.ndim == 2:
+                    pil_img = Image.fromarray(img_data, 'L')
+                elif img_data.ndim == 3:
+                    if img_data.shape[2] == 3:
+                        pil_img = Image.fromarray(img_data, 'RGB')
+                    elif img_data.shape[2] == 4:
+                        pil_img = Image.fromarray(img_data, 'RGBA')
+                    else:
+                        pil_img = Image.fromarray(img_data, 'RGB')
+                else:
+                    return False, "不支持的图像维度"
+            else:
+                # 对于PIL图像，确保是8位
+                pil_img = img_data
+                if pil_img.mode in ('I;16', 'I;16B', 'I;16L', 'I'):
+                    # 16位或32位图像转换为8位
+                    pil_img = self._apply_bit_depth(pil_img, 8)
+            
+            # 处理JPEG透明度问题
+            if format_upper == 'JPEG' and pil_img.mode in ('RGBA', 'LA', 'P'):
+                background = Image.new('RGB', pil_img.size, (255, 255, 255))
+                if pil_img.mode == 'P':
+                    pil_img = pil_img.convert('RGBA')
+                background.paste(pil_img, mask=pil_img.split()[-1] if pil_img.mode == 'RGBA' else None)
+                pil_img = background
+            
+            # 准备保存参数
+            save_kwargs = {'format': format_upper}
+            
+            if format_upper in ['JPEG', 'WEBP']:
+                save_kwargs.update({'quality': quality, 'optimize': True})
+            
+            # 添加DPI和EXIF信息
+            if dpi_info:
+                save_kwargs['dpi'] = dpi_info
+            if exif_data:
+                save_kwargs['exif'] = exif_data
+            
+            pil_img.save(output_path, **save_kwargs)
+            return True, ""
+            
+        except Exception as e:
+            return False, f"8位格式保存错误: {e}"
     
     def _load_image_and_metadata(self, input_path, target_bit_depth=None):
         """加载图像并提取元数据
@@ -232,6 +313,27 @@ class ImageConverter:
         
         return img
     
+    def _get_bit_depth_from_pil(self, pil_image):
+        """从PIL图像获取位深
+        
+        Args:
+            pil_image: PIL图像对象
+            
+        Returns:
+            int: 位深 (8, 16, 32)
+        """
+        mode = pil_image.mode
+        if mode in ('L', 'P', 'RGB', 'RGBA', 'CMYK', 'YCbCr', 'LAB', 'HSV'):
+            return 8
+        elif mode in ('I;16', 'I;16B', 'I;16L', 'I;16N'):
+            return 16
+        elif mode == 'I':
+            return 32
+        elif mode == 'F':
+            return 32  # 浮点数通常为32位
+        else:
+            return 8  # 默认返回8位
+
     def _is_raw_file(self, file_path):
         """检查文件是否为RAW格式
         
@@ -291,7 +393,7 @@ class ImageConverter:
             
         try:
             with rawpy.imread(file_path) as raw:
-                # 使用16位原始数据，保持最高质量
+                # 使用16位原始数据
                 rgb = raw.postprocess(
                     output_bps=16,
                     use_camera_wb=True,
@@ -299,8 +401,34 @@ class ImageConverter:
                     output_color=rawpy.ColorSpace.sRGB
                 )
                 
-                # 返回原始16位数据，位深转换在保存时处理
-                # 这样可以保持最高数据质量，避免多次转换损失
+                # 根据目标位深进行精确缩放
+                if target_bit_depth == 8:
+                    # 16位转8位：除以256（保留高8位）
+                    rgb = (rgb // 256).astype(np.uint8)
+                elif target_bit_depth == 10:
+                    # 16位转10位：缩放至0-1023范围
+                    # 确保数据在正确范围内
+                    rgb = np.clip(rgb // 64, 0, 1023).astype(np.uint16)
+                elif target_bit_depth == 12:
+                    # 16位转12位：缩放至0-4095范围
+                    rgb = np.clip(rgb // 16, 0, 4095).astype(np.uint16)
+                # 16位保持不变
+                
+                # 确保数据格式正确：RGB顺序，uint8或uint16
+                if rgb.dtype == np.uint8:
+                    # 8位数据已经是正确的格式
+                    pass
+                elif rgb.dtype == np.uint16:
+                    # 16位数据需要确保在正确的位深范围内
+                    if target_bit_depth == 10:
+                        # 10位数据：0-1023
+                        rgb = np.clip(rgb, 0, 1023)
+                    elif target_bit_depth == 12:
+                        # 12位数据：0-4095
+                        rgb = np.clip(rgb, 0, 4095)
+                    # 16位数据：0-65535，已经是正确的范围
+                
+                # 直接返回numpy数组，不转换为PIL图像
                 return rgb
         except Exception as e:
             print(f"RAW文件处理错误: {e}")
@@ -401,7 +529,7 @@ class ImageConverter:
             print(f"pillow_heif保存PIL图像错误: {e}")
             return False
     
-    def _save_numpy_array(self, image_data, output_path, format_name, quality=85, bit_depth=None):
+    def _save_numpy_array(self, image_data, output_path, format_name, quality=85):
         """保存numpy数组数据为图像文件
         
         Args:
@@ -409,63 +537,46 @@ class ImageConverter:
             output_path: 输出文件路径
             format_name: 输出格式名称
             quality: 质量参数
-            bit_depth: 位深设置 (8, 10, 12, 16)
             
         Returns:
             bool: 是否保存成功
         """
-        if not IMAGEIO_SUPPORTED:
-            return False
-            
         try:
             # 根据格式设置保存参数
             save_kwargs = {}
-            if format_name.upper() in ['JPEG', 'WEBP']:
+            format_upper = format_name.upper()
+            
+            if format_upper in ['JPEG', 'WEBP']:
                 save_kwargs['quality'] = quality
             
-            # 处理位深转换：只在保存时进行位深转换，避免多次转换损失
-            if bit_depth is not None and bit_depth in {8, 10, 12, 16}:
-                # 获取当前位深
-                current_bit_depth = 16 if image_data.dtype == np.uint16 else 8
-                
-                # 执行位深转换
-                if current_bit_depth != bit_depth:
-                    if bit_depth == 8:
-                        # 16位转8位：除以256
-                        image_data = (image_data // 256).astype(np.uint8)
-                    elif bit_depth == 10:
-                        # 16位转10位：除以64，限制在0-1023范围
-                        image_data = np.clip(image_data // 64, 0, 1023).astype(np.uint16)
-                    elif bit_depth == 12:
-                        # 16位转12位：除以16，限制在0-4095范围
-                        image_data = np.clip(image_data // 16, 0, 4095).astype(np.uint16)
-                    # 16位保持不变
-            
-            # 处理Pillow兼容性：确保uint16数据在标准范围内
-            if image_data.dtype == np.uint16:
-                # 检测数据范围
-                max_val = np.max(image_data)
-                if max_val <= 1023:
-                    # 10位数据：扩展到16位范围 (0-1023 -> 0-65535)
-                    image_data = (image_data * 64).astype(np.uint16)
-                elif max_val <= 4095:
-                    # 12位数据：扩展到16位范围 (0-4095 -> 0-65535)
-                    image_data = (image_data * 16).astype(np.uint16)
-                # 标准16位数据 (0-65535) 保持不变
-            
-            # 使用pillow保存图像
-            # Pillow无法处理3D的uint16数组，需要正确的处理方式
-            if image_data.ndim == 3 and image_data.dtype == np.uint16:
-                # 对于uint16的3D数组，需要转换为uint8或者使用其他方法
-                # 这里我们选择转换为uint8来避免Pillow的限制
-                if np.max(image_data) <= 255:
-                    image_data = image_data.astype(np.uint8)
+            # 使用Pillow保存图像
+            if image_data.dtype == np.uint8:
+                if image_data.ndim == 2:
+                    pil_img = Image.fromarray(image_data, 'L')
+                elif image_data.ndim == 3:
+                    if image_data.shape[2] == 3:
+                        pil_img = Image.fromarray(image_data, 'RGB')
+                    elif image_data.shape[2] == 4:
+                        pil_img = Image.fromarray(image_data, 'RGBA')
+                    else:
+                        pil_img = Image.fromarray(image_data, 'RGB')
                 else:
-                    # 如果数据范围超过255，则缩放到8位
-                    image_data = (image_data // 256).astype(np.uint8)
+                    return False
+            else:
+                # 16位数据
+                if image_data.ndim == 2:
+                    pil_img = Image.fromarray(image_data, 'I;16')
+                elif image_data.ndim == 3:
+                    # 对于彩色16位图像，转换为灰度
+                    if image_data.shape[2] == 3:
+                        gray_data = np.dot(image_data[...,:3], [0.2989, 0.5870, 0.1140])
+                        pil_img = Image.fromarray(gray_data.astype(np.uint16), 'I;16')
+                    else:
+                        pil_img = Image.fromarray(image_data[:,:,0], 'I;16')
+                else:
+                    return False
             
-            pil_image = Image.fromarray(image_data)
-            pil_image.save(output_path, format=format_name.upper(), **save_kwargs)
+            pil_img.save(output_path, format=format_upper, **save_kwargs)
             return True
         except Exception as e:
             print(f"numpy数组保存错误: {e}")
