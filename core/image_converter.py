@@ -18,6 +18,7 @@ class ImageConverter:
         }
         ext = os.path.splitext(input_path)[1].lower()
         is_raw = ext in raw_extensions
+        is_heic = ext in {'.heic', '.heif','.avif'}
 
         # 如果是raw的话使用rawpy读取数据
         if is_raw:
@@ -36,8 +37,8 @@ class ImageConverter:
 
                 heif_file = ph.from_bytes(
                     mode="BGRA;16",
-                    size=(bgr.shape[1], bgr.shape[0]),
-                    data=bytes(bgr)
+                    size=(bgr_16.shape[1], bgr_16.shape[0]),
+                    data=bytes(bgr_16)
                 )
                 
                 # 输出图像，jpg、png、tiff、webp由opencv输出，heif、heic、avif由pillow_heif输出
