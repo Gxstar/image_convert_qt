@@ -24,6 +24,7 @@ dependencies = [
     { name = "exifread" },
     { name = "numpy" },
     { name = "opencv-python" },
+    { name = "pillow" },
     { name = "pillow-heif" },
     { name = "pyside6" },
     { name = "rawpy" },
@@ -32,8 +33,9 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "exifread", specifier = ">=3.5.1" },
-    { name = "numpy", specifier = ">=2.3.4" },
-    { name = "opencv-python", specifier = ">=4.11.0.86" },
+    { name = "numpy", specifier = "==2.3.4" },
+    { name = "opencv-python", specifier = "==4.11.0.86" },
+    { name = "pillow", specifier = ">=12.0.0" },
     { name = "pillow-heif", specifier = ">=1.1.1" },
     { name = "pyside6", specifier = ">=6.10.0" },
     { name = "rawpy", path = "libs/rawpy-0.25.1-cp313-cp313-win_amd64.whl" },

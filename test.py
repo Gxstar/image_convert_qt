@@ -142,8 +142,8 @@ if __name__ == "__main__":
     # 示例调用 - 10位输出
     success = converter.convert_image(
         input_path="test.RW2",
-        output_path="output_10bit.heic",
-        format_name="heic",
+        output_path="output_10bit.avif",
+        format_name="avif",
         quality=100,
         bit_depth=10
     )
