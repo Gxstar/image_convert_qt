@@ -6,14 +6,15 @@ from pathlib import Path
 
 from core.image_converter import ImageConverter
 from core.utils import show_question
-
+from core.image_converter_bak import ImageConverter as ImageConverterBak
 
 class ConversionService:
     def __init__(self):
         """初始化转换服务"""
         self.converter = ImageConverter()
         self.parent_window = None
-    
+        self.converter_bak = ImageConverterBak()
+
     def convert_images(self, image_files, output_dir, output_format, quality=85, bit_depth=None, replace=False, progress_callback=None, parent_window=None, user_decisions=None):
         """
         转换图片文件
@@ -120,7 +121,7 @@ class ConversionService:
         Returns:
             list: 支持的格式列表
         """
-        return self.converter.get_supported_formats()
+        return self.converter_bak.get_supported_formats()
     
     def get_supported_input_formats(self):
         """
@@ -129,7 +130,7 @@ class ConversionService:
         Returns:
             list: 支持的输入格式列表
         """
-        return self.converter.get_supported_input_formats()
+        return self.converter_bak.get_supported_input_formats()
     
     def _find_conflict_files(self, directory, filename_stem):
         """
