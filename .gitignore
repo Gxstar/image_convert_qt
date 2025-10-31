@@ -44,3 +44,6 @@ Thumbs.db
 *.temp
 *.bak
 *.backup
+
+# 图片raw文件
+*.rw2
