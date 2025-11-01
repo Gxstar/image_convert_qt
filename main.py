@@ -7,6 +7,7 @@ from pathlib import Path
 
 from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox
 from PySide6.QtCore import Qt, QSettings
+from PySide6.QtGui import QIcon
 
 from ui_mainwindow import Ui_MainWindow
 from managers.grid_view_manager import GridViewManager
@@ -328,6 +329,9 @@ class MainWindow(QMainWindow):
 
 def main():
     app = QApplication(sys.argv)
+    # 设置应用程序图标
+    app.setWindowIcon(QIcon("icons/icon_a.png"))
+
     with open("style.qss", "r", encoding="utf-8") as f:
         app.setStyleSheet(f.read())
     # 设置应用程序信息
