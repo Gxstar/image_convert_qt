@@ -53,11 +53,22 @@ class ConversionService:
             try:
                 # 生成输出文件路径
                 filename = Path(image_path).stem
-                # 确保JPEG格式使用.jpg扩展名而不是.jpeg
-                if output_format.upper() == 'JPEG':
-                    output_filename = f"{filename}.jpg"
+                
+                # 如果output_format为None，表示保持原格式
+                if output_format is None:
+                    # 获取原文件的扩展名
+                    original_ext = Path(image_path).suffix.lower()
+                    # 处理JPEG格式的特殊情况
+                    if original_ext in ['.jpg', '.jpeg']:
+                        output_filename = f"{filename}.jpg"
+                    else:
+                        output_filename = f"{filename}{original_ext}"
                 else:
-                    output_filename = f"{filename}.{output_format.lower()}"
+                    # 确保JPEG格式使用.jpg扩展名而不是.jpeg
+                    if output_format.upper() == 'JPEG':
+                        output_filename = f"{filename}.jpg"
+                    else:
+                        output_filename = f"{filename}.{output_format.lower()}"
                 output_path = os.path.join(output_dir, output_filename)
                 
                 # 检查是否应该跳过
@@ -96,19 +107,45 @@ class ConversionService:
                         progress_callback(i + 1, total, image_path)
                     continue
                 
-                # 检查位深兼容性
-                is_compatible, actual_bit_depth = self._check_bit_depth_compatibility(image_path, bit_depth)
+                # 检查是否需要完全保持原样（原格式、原位深、quality=100）
+                is_keep_original = (output_format is None and bit_depth is None and quality == 100)
                 
-                # 如果位深不兼容，记录日志而不显示对话框
-                if not is_compatible and bit_depth is not None:
-                    original_bit_depth = self._get_image_bit_depth(image_path)
-                    message = f"{os.path.basename(image_path)}: {original_bit_depth}位→{bit_depth}位（自动调整为8位）"
+                if is_keep_original:
+                    # 完全保持原样，直接复制文件
+                    import shutil
+                    try:
+                        shutil.copy2(image_path, output_path)
+                        success = True
+                        error = None
+                    except Exception as copy_error:
+                        success = False
+                        error = str(copy_error)
+                else:
+                    # 检查位深兼容性
+                    is_compatible, actual_bit_depth = self._check_bit_depth_compatibility(image_path, bit_depth)
                     
-                    # 只在控制台输出，避免线程安全问题
-                    print(f"[位深调整] {message}")
-                
-                # 执行转换
-                success, error = self.converter.convert(image_path, output_path, output_format, quality, actual_bit_depth)
+                    # 如果位深不兼容，记录日志而不显示对话框
+                    if not is_compatible and bit_depth is not None:
+                        original_bit_depth = self._get_image_bit_depth(image_path)
+                        message = f"{os.path.basename(image_path)}: {original_bit_depth}位→{bit_depth}位（自动调整为8位）"
+                        
+                        # 只在控制台输出，避免线程安全问题
+                        print(f"[位深调整] {message}")
+                    
+                    # 执行转换
+                    # 如果output_format为None，表示保持原格式，不进行格式转换
+                    if output_format is None:
+                        # 直接复制文件，保持原格式
+                        import shutil
+                        try:
+                            shutil.copy2(image_path, output_path)
+                            success = True
+                            error = None
+                        except Exception as copy_error:
+                            success = False
+                            error = str(copy_error)
+                    else:
+                        success, error = self.converter.convert(image_path, output_path, output_format, quality, actual_bit_depth)
                 
                 if success:
                     success_count += 1
@@ -223,10 +260,21 @@ class ConversionService:
         
         for image_path in image_files:
             filename = Path(image_path).stem
-            if output_format.upper() == 'JPEG':
-                output_filename = f"{filename}.jpg"
+            
+            # 如果output_format为None，表示保持原格式
+            if output_format is None:
+                # 获取原文件的扩展名
+                original_ext = Path(image_path).suffix.lower()
+                # 处理JPEG格式的特殊情况
+                if original_ext in ['.jpg', '.jpeg']:
+                    output_filename = f"{filename}.jpg"
+                else:
+                    output_filename = f"{filename}{original_ext}"
             else:
-                output_filename = f"{filename}.{output_format.lower()}"
+                if output_format.upper() == 'JPEG':
+                    output_filename = f"{filename}.jpg"
+                else:
+                    output_filename = f"{filename}.{output_format.lower()}"
             output_path = os.path.join(output_dir, output_filename)
             
             conflicts = []

@@ -48,7 +48,7 @@ class MainWindow(QMainWindow):
         # 输出相关
         self.ui.outDirSelect.clicked.connect(self._select_output_directory)
         self.ui.qualityValue.valueChanged.connect(self._update_quality_display)
-        self.ui.formatSelection.currentTextChanged.connect(self._update_bit_depth_options)
+        self.ui.formatSelection.currentTextChanged.connect(self._on_format_changed)
         
         # 图片列表相关
         self.ui.clearSelected.clicked.connect(self._remove_selected)
@@ -121,22 +121,41 @@ class MainWindow(QMainWindow):
         self.image_list_manager.clear_all()
         self._update_selected_count()
         
+    def _on_format_changed(self, format_name):
+        """格式选择变化事件处理"""
+        # 更新位深选项
+        self._update_bit_depth_options(format_name)
+        
+        # 如果选择原格式，设置quality为100
+        if format_name == "原格式":
+            self.ui.qualityValue.setValue(100)
+    
     def _update_format_options(self):
         """更新格式选项"""
         formats = self.conversion_service.get_supported_formats()
         self.ui.formatSelection.clear()
+        # 添加"原格式"选项
+        self.ui.formatSelection.addItem("原格式")
         self.ui.formatSelection.addItems(formats)
         
         # 更新位深选项
         self._update_bit_depth_options(self.ui.formatSelection.currentText())
+        
+        # 如果选择原格式，设置quality为100
+        if self.ui.formatSelection.currentText() == "原格式":
+            self.ui.qualityValue.setValue(100)
         
     def _update_bit_depth_options(self, format_name):
         """根据格式更新位深选项"""
         # 清空现有选项
         self.ui.bitValue.clear()
         
+        # 如果选择"原格式"，添加"原位深"选项并默认选中
+        if format_name == "原格式":
+            self.ui.bitValue.addItems(["原位深", "8位", "10位", "12位", "16位"])
+            self.ui.bitValue.setCurrentText("原位深")
         # 根据格式设置位深选项
-        if format_name.upper() in ['JPEG', 'WEBP','AVIF']:
+        elif format_name.upper() in ['JPEG', 'WEBP','AVIF']:
             # JPEG、WEBP、AVIF只支持8位
             self.ui.bitValue.addItems(["8位"])
             self.ui.bitValue.setCurrentText("8位")
@@ -186,10 +205,16 @@ class MainWindow(QMainWindow):
         quality = self.ui.qualityValue.value()
         replace = self.ui.isReplace.isChecked()
         
+        # 如果选择"原格式"，则format_ext为None，表示保持原格式
+        if format_ext == "原格式":
+            format_ext = None
+        
         # 获取位深参数
         bit_depth_text = self.ui.bitValue.currentText()
         bit_depth = 8  # 默认设置为8位
-        if bit_depth_text:
+        if bit_depth_text == "原位深":
+            bit_depth = None  # 表示保持原位深
+        elif bit_depth_text:
             # 从文本中提取数字
             if "位" in bit_depth_text:
                 bit_depth_str = bit_depth_text.replace("位", "")
