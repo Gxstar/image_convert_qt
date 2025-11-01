@@ -3,17 +3,18 @@
 """
 import os
 from pathlib import Path
+import cv2 as cv
+from PIL import Image
+import rawpy
 
 from core.image_converter import ImageConverter
-from core.utils import show_question
-from core.image_converter_bak import ImageConverter as ImageConverterBak
+from core.utils import show_question, show_message
 
 class ConversionService:
     def __init__(self):
         """初始化转换服务"""
         self.converter = ImageConverter()
         self.parent_window = None
-        self.converter_bak = ImageConverterBak()
 
     def convert_images(self, image_files, output_dir, output_format, quality=85, bit_depth=None, replace=False, progress_callback=None, parent_window=None, user_decisions=None):
         """
@@ -95,8 +96,24 @@ class ConversionService:
                         progress_callback(i + 1, total, image_path)
                     continue
                 
+                # 检查位深兼容性
+                is_compatible, actual_bit_depth = self._check_bit_depth_compatibility(image_path, bit_depth)
+                
+                # 如果位深不兼容，显示提示信息
+                if not is_compatible and bit_depth is not None:
+                    original_bit_depth = self._get_image_bit_depth(image_path)
+                    message = f"图像 {os.path.basename(image_path)} 的原始位深为 {original_bit_depth} 位，\n"
+                    message += f"但您要求输出 {bit_depth} 位。\n\n"
+                    message += "位深不能大于原始图像的位深。\n"
+                    message += "将按照 8 位进行输出。"
+                    
+                    if self.parent_window:
+                        show_message(self.parent_window, "位深不兼容", message)
+                    else:
+                        print(message)
+                
                 # 执行转换
-                success, error = self.converter.convert(image_path, output_path, output_format, quality, bit_depth)
+                success, error = self.converter.convert(image_path, output_path, output_format, quality, actual_bit_depth)
                 
                 if success:
                     success_count += 1
@@ -121,16 +138,25 @@ class ConversionService:
         Returns:
             list: 支持的格式列表
         """
-        return self.converter_bak.get_supported_formats()
+        supported_formats = ['JPEG', 'PNG', 'TIFF', 'WEBP', 'HEIC', 'HEIF', 'AVIF']
+        return supported_formats
     
     def get_supported_input_formats(self):
         """
         获取支持的输入格式（包括RAW文件）
         
         Returns:
-            list: 支持的输入格式列表
+            list: 支持的输入格式列表（统一使用大写）
         """
-        return self.converter_bak.get_supported_input_formats()
+        # Pillow支持的常用图片格式
+        pillow_formats = ['JPEG', 'PNG', 'BMP', 'GIF', 'TIFF', 'WEBP', 'HEIC', 'HEIF', 'AVIF', 'ICO', 'PPM', 'PGM', 'PBM', 'DDS', 'PCX', 'TGA', 'SGI', 'XBM', 'XPM']
+        
+        # 常见相机厂商的RAW格式
+        raw_formats = ['RAW', 'CR2', 'CR3', 'CRW', 'NEF', 'NRW', 'ARW', 'SR2', 'SRF', 'DNG', 'ORF', 'RW2', 'PEF', 'RAF', 'SRW', '3FR', 'FFF', 'KDC', 'MRW', 'MOS', 'RWL', 'SRW', 'X3F']
+        
+        # 合并所有支持的输入格式
+        supported_input_formats = pillow_formats + raw_formats
+        return supported_input_formats
     
     def _find_conflict_files(self, directory, filename_stem):
         """
@@ -153,11 +179,27 @@ class ConversionService:
             all_extensions.add(f'.{fmt.lower()}')
             all_extensions.add(f'.{fmt.upper()}')
         
+        # 获取支持的输入格式并添加扩展名
+        input_formats = self.get_supported_input_formats()
+        for fmt in input_formats:
+            all_extensions.add(f'.{fmt.lower()}')
+            all_extensions.add(f'.{fmt.upper()}')
+        
         # 添加一些额外的常见格式
         extra_extensions = {'.jpg', '.jpeg', '.JPG', '.JPEG', '.png', '.PNG', 
                            '.bmp', '.BMP', '.gif', '.GIF', '.tiff', '.TIFF', 
                            '.webp', '.WEBP', '.heic', '.HEIC', '.heif', '.HEIF',
-                           '.avif', '.AVIF'}
+                           '.avif', '.AVIF', '.ico', '.ICO', '.ppm', '.PPM',
+                           '.pgm', '.PGM', '.pbm', '.PBM', '.dds', '.DDS',
+                           '.pcx', '.PCX', '.tga', '.TGA', '.sgi', '.SGI',
+                           '.xbm', '.XBM', '.xpm', '.XPM', '.cr2', '.CR2',
+                           '.cr3', '.CR3', '.crw', '.CRW', '.nef', '.NEF',
+                           '.nrw', '.NRW', '.arw', '.ARW', '.sr2', '.SR2',
+                           '.srf', '.SRF', '.dng', '.DNG', '.orf', '.ORF',
+                           '.rw2', '.RW2', '.pef', '.PEF', '.raf', '.RAF',
+                           '.srw', '.SRW', '.3fr', '.3FR', '.fff', '.FFF',
+                           '.kdc', '.KDC', '.mrw', '.MRW', '.mos', '.MOS',
+                           '.rwl', '.RWL', '.x3f', '.X3F'}
         all_extensions.update(extra_extensions)
         
         # 检查每个可能的扩展名
@@ -305,3 +347,75 @@ class ConversionService:
                 decisions[image_path] = 'skip'
         
         return decisions
+
+    def _get_image_bit_depth(self, image_path):
+        """
+        获取图像的原始位深
+        
+        Args:
+            image_path: 图像文件路径
+            
+        Returns:
+            int: 图像的原始位深（8, 10, 12, 16等）
+        """
+        try:
+            # 判断是否为RAW文件
+            raw_extensions = {
+                '.cr2', '.cr3', '.nef', '.nrw', '.arw', '.srf', '.sr2',
+                '.dng', '.orf', '.rw2', '.rwl', '.pef', '.ptx',
+                '.3fr', '.fff', '.mef', '.mos', '.erf', '.dcr', '.kdc',
+                '.raw', '.raf', '.x3f', '.iiq'
+            }
+            ext = os.path.splitext(image_path)[1].lower()
+            is_raw = ext in raw_extensions
+            
+            if is_raw:
+                # RAW文件通常为16位
+                return 16
+            else:
+                # 使用OpenCV读取图像
+                img = cv.imread(image_path)
+                if img is None:
+                    # 如果OpenCV无法读取，尝试使用Pillow
+                    with Image.open(image_path) as pil_img:
+                        if pil_img.mode in ('I;16', 'I;16B', 'I;16L', 'I;16N'):
+                            return 16
+                        elif pil_img.mode in ('I;12', 'I;12B', 'I;12L'):
+                            return 12
+                        elif pil_img.mode in ('I;10', 'I;10B', 'I;10L'):
+                            return 10
+                        else:
+                            return 8
+                else:
+                    # 检查OpenCV图像的数据类型
+                    if img.dtype == 'uint16':
+                        return 16
+                    elif img.dtype == 'uint8':
+                        return 8
+                    else:
+                        return 8  # 默认返回8位
+        except Exception as e:
+            print(f"获取图像位深失败 {image_path}: {str(e)}")
+            return 8  # 出错时默认返回8位
+
+    def _check_bit_depth_compatibility(self, image_path, requested_bit_depth):
+        """
+        检查请求的位深是否大于图像的原始位深
+        
+        Args:
+            image_path: 图像文件路径
+            requested_bit_depth: 用户请求的输出位深
+            
+        Returns:
+            tuple: (是否兼容, 实际使用的位深)
+        """
+        if requested_bit_depth is None:
+            return True, None
+            
+        original_bit_depth = self._get_image_bit_depth(image_path)
+        
+        # 如果请求的位深大于原始位深，则不兼容
+        if requested_bit_depth > original_bit_depth:
+            return False, 8  # 不兼容时强制使用8位
+        else:
+            return True, requested_bit_depth  # 兼容时使用请求的位深

@@ -136,17 +136,17 @@ class MainWindow(QMainWindow):
         self.ui.bitValue.clear()
         
         # 根据格式设置位深选项
-        if format_name.upper() in ['JPEG', 'WEBP']:
-            # JPEG和WEBP只支持8位
+        if format_name.upper() in ['JPEG', 'WEBP','AVIF']:
+            # JPEG、WEBP、AVIF只支持8位
             self.ui.bitValue.addItems(["8位"])
             self.ui.bitValue.setCurrentText("8位")
         elif format_name.upper() in ['PNG', 'TIFF']:
             # PNG和TIFF支持8位和16位
             self.ui.bitValue.addItems(["8位", "16位"])
             self.ui.bitValue.setCurrentText("8位")
-        elif format_name.upper() in ['AVIF', 'HEIC', 'HEIF']:
-            # AVIF、HEIC、HEIF支持8位、10位、12位和16位
-            self.ui.bitValue.addItems(["8位", "10位", "12位", "16位"])
+        elif format_name.upper() in ['HEIC', 'HEIF']:
+            # HEIC、HEIF支持8位、10位、12位
+            self.ui.bitValue.addItems(["8位", "10位", "12位"])
             self.ui.bitValue.setCurrentText("8位")
         else:
             # 其他格式默认只支持8位
