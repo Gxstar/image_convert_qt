@@ -9,7 +9,7 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBo
 from PySide6.QtCore import Qt, QSettings
 
 from ui_mainwindow import Ui_MainWindow
-from managers.image_list_manager import ImageListManager
+from managers.grid_view_manager import GridViewManager
 from services.image_loader_service import ImageLoaderService
 from services.conversion_service import ConversionService
 from core.utils import show_message, show_question
@@ -24,7 +24,10 @@ class MainWindow(QMainWindow):
         # 初始化服务和管理器
         self.conversion_service = ConversionService()
         self.loader_service = ImageLoaderService()
-        self.image_list_manager = ImageListManager(self.ui.imageList)
+        self.grid_view_manager = GridViewManager(self)
+        
+        # 设置网格视图
+        self.grid_view_manager.setup_grid_view(self.ui.verticalLayout_3, self.ui.imageList)
         
         # 初始化变量
         self.bit_depth = None
@@ -67,7 +70,7 @@ class MainWindow(QMainWindow):
         )
         
         if file_paths:
-            self.image_list_manager.add_files(file_paths)
+            self.grid_view_manager.add_files(file_paths)
             self._update_selected_count()
             
     def _select_directories(self):
@@ -89,7 +92,7 @@ class MainWindow(QMainWindow):
                 image_paths.extend([str(p) for p in paths])
                 
             if image_paths:
-                self.image_list_manager.add_files(image_paths)
+                self.grid_view_manager.add_files(image_paths)
                 self._update_selected_count()
             else:
                 show_message(self, "提示", "所选目录中未找到图片文件")
@@ -108,17 +111,17 @@ class MainWindow(QMainWindow):
         
     def _update_selected_count(self):
         """更新选中数量显示"""
-        count = self.image_list_manager.get_file_count()
+        count = self.grid_view_manager.get_file_count()
         self.ui.selectedNum.display(count)
         
     def _remove_selected(self):
         """移除选中的图片"""
-        self.image_list_manager.remove_selected()
+        self.grid_view_manager.remove_selected()
         self._update_selected_count()
         
     def _clear_all(self):
         """清除所有图片"""
-        self.image_list_manager.clear_all()
+        self.grid_view_manager.clear_all()
         self._update_selected_count()
         
     def _on_format_changed(self, format_name):
@@ -187,7 +190,7 @@ class MainWindow(QMainWindow):
     def _convert_images(self):
         """转换图片"""
         # 检查是否有选中文件
-        if self.image_list_manager.get_file_count() == 0:
+        if self.grid_view_manager.get_file_count() == 0:
             show_message(self, "提示", "请先选择要转换的图片")
             return
             
@@ -224,7 +227,7 @@ class MainWindow(QMainWindow):
                     bit_depth = 8
         
         # 获取图片文件列表
-        image_files = self.image_list_manager.get_file_paths()
+        image_files = self.grid_view_manager.get_file_paths()
         
         # 预扫描冲突（在主线程中执行）
         conflict_info = self.conversion_service._scan_for_conflicts(image_files, output_dir, format_ext, replace)
@@ -311,10 +314,15 @@ class MainWindow(QMainWindow):
         self.convert_thread.start()
         
     def closeEvent(self, event):
-        """关闭事件，保存设置"""
+        """关闭事件，保存设置并清理资源"""
         # 保存设置
         self.settings.setValue("output_dir", self.ui.lineEdit.text())
         self.settings.setValue("quality", self.ui.qualityValue.value())
+        
+        # 清理缩略图管理器的工作线程
+        if hasattr(self.grid_view_manager, 'thumbnail_manager'):
+            self.grid_view_manager.thumbnail_manager.cleanup()
+        
         event.accept()
 
 
