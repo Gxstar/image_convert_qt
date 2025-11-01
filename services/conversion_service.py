@@ -99,18 +99,13 @@ class ConversionService:
                 # 检查位深兼容性
                 is_compatible, actual_bit_depth = self._check_bit_depth_compatibility(image_path, bit_depth)
                 
-                # 如果位深不兼容，显示提示信息
+                # 如果位深不兼容，记录日志而不显示对话框
                 if not is_compatible and bit_depth is not None:
                     original_bit_depth = self._get_image_bit_depth(image_path)
-                    message = f"图像 {os.path.basename(image_path)} 的原始位深为 {original_bit_depth} 位，\n"
-                    message += f"但您要求输出 {bit_depth} 位。\n\n"
-                    message += "位深不能大于原始图像的位深。\n"
-                    message += "将按照 8 位进行输出。"
+                    message = f"{os.path.basename(image_path)}: {original_bit_depth}位→{bit_depth}位（自动调整为8位）"
                     
-                    if self.parent_window:
-                        show_message(self.parent_window, "位深不兼容", message)
-                    else:
-                        print(message)
+                    # 只在控制台输出，避免线程安全问题
+                    print(f"[位深调整] {message}")
                 
                 # 执行转换
                 success, error = self.converter.convert(image_path, output_path, output_format, quality, actual_bit_depth)
