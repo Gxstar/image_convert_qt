@@ -131,6 +131,10 @@ class ThumbnailGridView(QListView):
         self.setSpacing(10)
         self.setGridSize(QSize(120, 150))  # 网格大小
         
+        # 禁用视图优化，确保所有项目都能正确渲染
+        self.setViewportMargins(0, 0, 0, 0)
+        self.setBatchSize(100)  # 增加批量处理大小
+        
         # 设置委托
         self.delegate = ThumbnailDelegate(self.thumbnail_manager, self)
         self.setItemDelegate(self.delegate)
