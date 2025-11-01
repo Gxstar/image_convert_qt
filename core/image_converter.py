@@ -1,7 +1,6 @@
 import os
 import cv2 as cv
 from PIL import Image
-from PIL.ExifTags import TAGS
 import pillow_heif as ph
 import rawpy
 import pyexiv2
@@ -75,10 +74,17 @@ class ImageConverter:
                         )
                 elif bit_depth>8 and format_name in {'PNG','TIFF'}:
                     # 处理输出png、tiff格式
-                    cv.imwrite(output_path, bgr_16,
-                        [int(cv.IMWRITE_PNG_COMPRESSION), 9] if format_name=='PNG' else
-                        [int(cv.IMWRITE_TIFF_COMPRESSION), 32946]
-                    )
+                    try:
+                        if format_name=='PNG':
+                            cv.imwrite(output_path, bgr_16,
+                                [cv.IMWRITE_PNG_COMPRESSION, 9]
+                            )
+                        elif format_name=='TIFF':
+                            cv.imwrite(output_path, bgr_16,
+                                [cv.IMWRITE_TIFF_COMPRESSION, 32946]
+                            )
+                    except Exception as e:
+                        return (False,f"转换失败：{str(e)}")
                     with pyexiv2.Image(input_path,encoding='GBK') as img1:
                         with pyexiv2.Image(output_path,encoding='GBK') as img2:
                             img1.copy_to_another_image(img2, exif=True, iptc=True, xmp=True, comment=False, icc=False, thumbnail=False)
