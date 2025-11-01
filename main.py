@@ -330,7 +330,7 @@ class MainWindow(QMainWindow):
 def main():
     app = QApplication(sys.argv)
     # 设置应用程序图标
-    app.setWindowIcon(QIcon("icons/icon_a.png"))
+    app.setWindowIcon(QIcon("icons/icon1.ico"))
 
     with open("style.qss", "r", encoding="utf-8") as f:
         app.setStyleSheet(f.read())

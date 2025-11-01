@@ -47,3 +47,6 @@ Thumbs.db
 
 # 图片raw文件
 *.rw2
+
+# 编译后文件
+out/
