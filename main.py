@@ -326,13 +326,22 @@ class MainWindow(QMainWindow):
         
         event.accept()
 
+def resource_path(relative_path):
+    """ 获取资源的绝对路径，兼容开发环境和打包后的环境 """
+    if getattr(sys, 'frozen', False):
+        base_path = sys._MEIPASS
+    else:
+        base_path = os.path.abspath(".")
+    
+    return os.path.join(base_path, relative_path)
 
 def main():
     app = QApplication(sys.argv)
     # 设置应用程序图标
-    app.setWindowIcon(QIcon("icons/icon1.ico"))
-
-    with open("style.qss", "r", encoding="utf-8") as f:
+    app.setWindowIcon(QIcon(resource_path("icons/icon1.ico")))
+    
+    # 加载样式表
+    with open(resource_path("style.qss"), "r", encoding="utf-8") as f:
         app.setStyleSheet(f.read())
     # 设置应用程序信息
     app.setApplicationName("ImageConverter")
