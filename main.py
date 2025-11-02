@@ -63,16 +63,16 @@ class MainWindow(QMainWindow):
         
     def _select_images(self):
         """选择图片文件"""
-        file_paths, _ = QFileDialog.getOpenFileNames(
-            self, 
-            "选择图片", 
-            "", 
-            "图片文件 (*.png *.jpg *.jpeg *.bmp *.tiff *.tif *.webp *.heic *.heif *.avif *.gif *.jp2 *.j2k *.cr2 *.cr3 *.nef *.nrw *.arw *.dng *.orf *.rw2 *.pef *.raf *.raw)"
-        )
+        # 创建自定义文件对话框
+        dialog = QFileDialog(self, "选择图片")
+        dialog.setFileMode(QFileDialog.FileMode.ExistingFiles)
+        dialog.setNameFilter("普通图片 (*.png *.jpg *.jpeg *.bmp *.tiff *.tif *.webp *.heic *.heif *.avif *.gif *.jp2 *.j2k);;RAW图片 (*.cr2 *.cr3 *.nef *.nrw *.arw *.dng *.orf *.rw2 *.pef *.raf *.raw);;所有图片 (*.png *.jpg *.jpeg *.bmp *.tiff *.tif *.webp *.heic *.heif *.avif *.gif *.jp2 *.j2k *.cr2 *.cr3 *.nef *.nrw *.arw *.dng *.orf *.rw2 *.pef *.raf *.raw)")
         
-        if file_paths:
-            self.grid_view_manager.add_files(file_paths)
-            self._update_selected_count()
+        if dialog.exec():
+            file_paths = dialog.selectedFiles()
+            if file_paths:
+                self.grid_view_manager.add_files(file_paths)
+                self._update_selected_count()
             
     def _select_directories(self):
         """选择图片目录"""
@@ -338,16 +338,24 @@ def resource_path(relative_path):
 def main():
     app = QApplication(sys.argv)
     # 设置应用程序图标
-    app.setWindowIcon(QIcon(resource_path("icons/icon1.ico")))
+    icon_path = resource_path("icons/icon2.ico")
+    app_icon = QIcon(icon_path)
+    app.setWindowIcon(app_icon)
     
     # 加载样式表
-    with open(resource_path("style.qss"), "r", encoding="utf-8") as f:
-        app.setStyleSheet(f.read())
+    style_path = resource_path("style.qss")
+    if os.path.exists(style_path):
+        with open(style_path, "r", encoding="utf-8") as f:
+            style_content = f.read()
+            app.setStyleSheet(style_content)
+    
     # 设置应用程序信息
     app.setApplicationName("ImageConverter")
     app.setApplicationDisplayName("图片格式转换器")
     
     window = MainWindow()
+    window.setWindowTitle("图片格式转换器")
+    window.setWindowIcon(app_icon)
     window.show()
     
     sys.exit(app.exec())
