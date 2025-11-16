@@ -1,12 +1,12 @@
 import os
 import cv2 as cv
 from PIL import Image
-import pillow_heif as ph
+from pillow_heif import register_heif_opener
 import rawpy
 import pyexiv2
 from .get_exif import get_exif_data
 
-ph.register_heif_opener()
+register_heif_opener()
 
 class ImageConverter:
     def __init__(self):
